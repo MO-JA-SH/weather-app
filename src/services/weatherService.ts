@@ -32,7 +32,7 @@ export async function fetchWeatherData(coords: Coordinates): Promise<WeatherData
   url.searchParams.set('latitude', lat.toString());
   url.searchParams.set('longitude', lon.toString());
   url.searchParams.set('timezone', 'auto');
-  url.searchParams.set('forecast_days', '7');
+  url.searchParams.set('forecast_days', '16');
   url.searchParams.set('models', 'ecmwf_ifs,gfs_seamless,icon_seamless'); // <-- تعديل هنا
   url.searchParams.set('hourly', 'temperature_2m,relativehumidity_2m,precipitation,rain,windspeed_10m,weathercode');
   url.searchParams.set('daily', 'weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum');
