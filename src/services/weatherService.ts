@@ -32,8 +32,8 @@ export async function fetchWeatherData(coords: Coordinates): Promise<WeatherData
   url.searchParams.set('latitude', lat.toString());
   url.searchParams.set('longitude', lon.toString());
   url.searchParams.set('timezone', 'auto');
-  url.searchParams.set('forecast_days', '16');
-  url.searchParams.set('models', 'ecmwf_ifs,gfs_seamless,icon_seamless'); // <-- تعديل هنا
+  url.searchParams.set('forecast_days', '16'); // <-- التغيير هنا: 7 → 16
+  url.searchParams.set('models', 'ecmwf_ifs,gfs_seamless,icon_seamless');
   url.searchParams.set('hourly', 'temperature_2m,relativehumidity_2m,precipitation,rain,windspeed_10m,weathercode');
   url.searchParams.set('daily', 'weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum');
 
@@ -51,14 +51,12 @@ export async function fetchWeatherData(coords: Coordinates): Promise<WeatherData
     const timeIndex = data.hourly.time.findIndex((t: string) => t.startsWith(currentHourStr));
     const idx = timeIndex >= 0 ? timeIndex : 0;
 
-    // استخراج درجات الحرارة من النماذج المختلفة (باستخدام الأسماء الصحيحة)
     const modelTemps: ModelTemperature = {
       ecmwf: data.hourly.temperature_2m_ecmwf_ifs?.[idx] ?? null,
       gfs: data.hourly.temperature_2m_gfs_seamless?.[idx] ?? null,
       icon: data.hourly.temperature_2m_icon_seamless?.[idx] ?? null,
     };
 
-    // استخراج بيانات الطقس الحالي من نموذج ECMWF (كمرجع)
     const current: CurrentWeather = {
       time: data.hourly.time[idx],
       temperature_2m: data.hourly.temperature_2m_ecmwf_ifs?.[idx] ?? 0,
@@ -69,7 +67,6 @@ export async function fetchWeatherData(coords: Coordinates): Promise<WeatherData
       rain: data.hourly.rain_ecmwf_ifs?.[idx] ?? 0,
     };
 
-    // استخراج التوقعات اليومية
     const daily: DailyForecast[] = [];
     for (let i = 0; i < data.daily.time.length; i++) {
       daily.push({
