@@ -12,32 +12,62 @@ const CurrentWeatherComponent: React.FC<Props> = ({ current, modelTemps, locatio
   const weatherIcon = getWeatherIcon(current.weathercode);
   const weatherDesc = getWeatherDescription(current.weathercode);
 
-  // **حساب درجة الحرارة المحسوسة بالمعادلة الصحيحة**
-  // Feels Like = 13.12 + 0.6215*T - 11.37*(v^0.16) + 0.3965*T*(v^0.16)
-  const T = current.temperature_2m;
-  const v = current.windspeed_10m;
-  const vPow = Math.pow(v, 0.16);
-  const feelsLike = 13.12 + (0.6215 * T) - (11.37 * vPow) + (0.3965 * T * vPow);
+  // دالة لحساب الحرارة المحسوسة بدقة أكبر
+  const calculateFeelsLike = (temp: number, wind: number, humidity: number): number => {
+    // إذا كانت الحرارة أقل من 10 درجات، نستخدم معادلة Wind Chill
+    if (temp < 10) {
+      // معادلة Wind Chill (لكل من C و km/h)
+      const windChill = 13.12 + 0.6215 * temp - 11.37 * Math.pow(wind, 0.16) + 0.3965 * temp * Math.pow(wind, 0.16);
+      return Math.round(windChill * 10) / 10; // تقريب لرقم عشري واحد
+    } 
+    // إذا كانت الحرارة أعلى من 20، نستخدم Heat Index (بسيط)
+    else if (temp > 20) {
+      // معادلة تقريبية لـ Heat Index
+      const heatIndex = temp + (humidity * 0.1);
+      return Math.round(heatIndex * 10) / 10;
+    }
+    // في المنطقة المعتدلة، نستخدم متوسط بسيط
+    else {
+      return Math.round((temp - (wind * 0.1) + (humidity * 0.05)) * 10) / 10;
+    }
+  };
+
+  const feelsLike = calculateFeelsLike(current.temperature_2m, current.windspeed_10m, current.relativehumidity_2m);
+
+  // تنسيق التاريخ بشكل جميل بدون ساعة
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ar', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
 
   return (
     <div className="bg-white/40 backdrop-blur-md rounded-3xl p-6 shadow-xl mx-4 mt-6">
-      <h2 className="text-3xl font-bold text-gray-800 mb-2">{locationName}</h2>
-      <p className="text-gray-600 mb-4">{new Date(current.time).toLocaleString('ar')}</p>
+      <div className="flex justify-between items-start mb-2">
+        <h2 className="text-3xl font-bold text-gray-800">{locationName}</h2>
+        <span className="text-sm text-gray-600 bg-white/30 px-3 py-1 rounded-full">
+          {formatDate(current.time)}
+        </span>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
         {/* أيقونة ودرجة الحرارة الرئيسية + المحسوسة */}
         <div className="col-span-1 flex items-center gap-4">
           <span className="text-7xl">{weatherIcon}</span>
           <div>
             <div className="text-5xl font-light">{current.temperature_2m.toFixed(1)}°C</div>
             <div className="text-gray-700">{weatherDesc}</div>
-            <div className="text-sm text-gray-600 mt-1 flex items-center gap-1">
+            <div className="text-sm text-gray-600 mt-2 flex items-center gap-1 bg-blue-100/50 px-2 py-1 rounded-full">
               <span>🌡️</span> محسوسة: {feelsLike.toFixed(1)}°C
             </div>
           </div>
         </div>
 
-        {/* درجات الحرارة من النماذج مع أعلام الدول (وليس حروف) */}
+        {/* درجات الحرارة من النماذج مع أعلام الدول */}
         <div className="col-span-1 grid grid-cols-3 gap-2">
           <div className="bg-blue-50/70 rounded-xl p-3 text-center">
             <div className="text-sm font-semibold text-gray-700">ECMWF</div>
@@ -56,7 +86,7 @@ const CurrentWeatherComponent: React.FC<Props> = ({ current, modelTemps, locatio
           </div>
         </div>
 
-        {/* المؤشرات الأربعة مع الرموز */}
+        {/* المؤشرات الأربعة: مطر، رطوبة، رياح، محسوسة (بدلاً من التساقط) */}
         <div className="col-span-1 grid grid-cols-2 gap-3">
           <div className="bg-white/60 rounded-xl p-3 flex items-center gap-2">
             <span className="text-2xl">☔</span>
