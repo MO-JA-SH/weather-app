@@ -6,25 +6,11 @@ import LoadingSpinner from './components/LoadingSpinner';
 import { fetchWeatherData, searchCity } from './services/weatherService';
 import { WeatherData, Coordinates, GeocodingResult } from './types';
 
-const getWeatherBackground = (weatherCode: number): string => {
-  if (weatherCode === 0) return 'sunny';
-  if (weatherCode === 1 || weatherCode === 2) return 'partly-cloudy';
-  if (weatherCode === 3) return 'cloudy';
-  if (weatherCode >= 45 && weatherCode <= 48) return 'foggy';
-  if (weatherCode >= 51 && weatherCode <= 67) return 'rainy';
-  if (weatherCode >= 71 && weatherCode <= 77) return 'snowy';
-  if (weatherCode >= 80 && weatherCode <= 82) return 'rainy';
-  if (weatherCode >= 85 && weatherCode <= 86) return 'snowy';
-  if (weatherCode >= 95 && weatherCode <= 99) return 'stormy';
-  return 'default';
-};
-
 function App() {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [locationName, setLocationName] = useState<string>('');
-  const [backgroundClass, setBackgroundClass] = useState<string>('default');
 
   const loadWeather = useCallback(async (coords: Coordinates) => {
     setLoading(true);
@@ -92,44 +78,24 @@ function App() {
     getUserLocation();
   }, [getUserLocation]);
 
-  useEffect(() => {
-    if (weather) {
-      const bg = getWeatherBackground(weather.current.weathercode);
-      setBackgroundClass(bg);
-    }
-  }, [weather]);
-
   return (
-    <div className={`min-h-screen pb-8 transition-all duration-1000 ${backgroundClass} flex flex-col`}>
-      {/* العلامة المائية في الأعلى - اسمك بحروف كبيرة */}
-      <header className="text-center py-3 bg-black/30 backdrop-blur-sm text-white text-sm font-bold tracking-wider">
-        MOHAMMED JAFER ALSHOUHA
-      </header>
+    <div className="min-h-screen pb-8 bg-gradient-to-br from-sky-50 to-blue-100">
+      <SearchBar onSearch={handleSearch} onUseLocation={getUserLocation} isLoading={loading} />
 
-      {/* المحتوى الرئيسي */}
-      <main className="flex-1">
-        <SearchBar onSearch={handleSearch} onUseLocation={getUserLocation} isLoading={loading} />
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mx-4 mt-4">
+          {error}
+        </div>
+      )}
 
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mx-4 mt-4">
-            {error}
-          </div>
-        )}
+      {loading && <LoadingSpinner />}
 
-        {loading && <LoadingSpinner />}
-
-        {!loading && weather && (
-          <>
-            <CurrentWeather current={weather.current} modelTemps={weather.modelTemps} locationName={locationName} />
-            <Forecast daily={weather.daily} />
-          </>
-        )}
-      </main>
-
-      {/* العلامة المائية في الأسفل - حقوق النشر */}
-      <footer className="text-center py-3 bg-black/30 backdrop-blur-sm text-white text-xs font-semibold tracking-wider mt-6">
-        BY MOHAMMED JAFER ALSHOUHA © {new Date().getFullYear()}
-      </footer>
+      {!loading && weather && (
+        <>
+          <CurrentWeather current={weather.current} modelTemps={weather.modelTemps} locationName={locationName} />
+          <Forecast daily={weather.daily} />
+        </>
+      )}
     </div>
   );
 }

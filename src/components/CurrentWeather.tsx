@@ -12,18 +12,23 @@ const CurrentWeatherComponent: React.FC<Props> = ({ current, modelTemps, locatio
   const weatherIcon = getWeatherIcon(current.weathercode);
   const weatherDesc = getWeatherDescription(current.weathercode);
 
-  // **حساب درجة الحرارة المحسوسة بالمعادلة الصحيحة**
-  // Feels Like = 13.12 + 0.6215*T - 11.37*(v^0.16) + 0.3965*T*(v^0.16)
+  // **حساب درجة الحرارة المحسوسة**
   const T = current.temperature_2m;
   const v = current.windspeed_10m;
   const vPow = Math.pow(v, 0.16);
   const feelsLike = 13.12 + (0.6215 * T) - (11.37 * vPow) + (0.3965 * T * vPow);
 
+  // **تنسيق التاريخ يدوياً: يوم - شهر - سنة**
+  const dateObj = new Date(current.time);
+  const day = dateObj.getDate();
+  const month = dateObj.getMonth() + 1; // شهور من 0-11
+  const year = dateObj.getFullYear();
+  const formattedDate = `${day} - ${month} - ${year}`;
+
   return (
     <div className="bg-white/40 backdrop-blur-md rounded-3xl p-6 shadow-xl mx-4 mt-6">
       <h2 className="text-3xl font-bold text-gray-800 mb-2">{locationName}</h2>
-      {/* السطر المعدل: toLocaleDateString بدلاً من toLocaleString */}
-      <p className="text-gray-600 mb-4">{new Date(current.time).toLocaleDateString('ar')}</p>
+      <p className="text-gray-600 mb-4">{formattedDate}</p>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* أيقونة ودرجة الحرارة الرئيسية + المحسوسة */}
