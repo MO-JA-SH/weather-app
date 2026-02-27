@@ -12,9 +12,12 @@ const CurrentWeatherComponent: React.FC<Props> = ({ current, modelTemps, locatio
   const weatherIcon = getWeatherIcon(current.weathercode);
   const weatherDesc = getWeatherDescription(current.weathercode);
 
-  // **لحساب درجة الحرارة المحسوسة (تقريب بسيط)**
-  // الحساب الفعلي يحتاج معادلة معقدة، لكن سنستخدم تقريب: المحسوسة = الحرارة - (الرياح * 0.2) + (الرطوبة * 0.1)
-  const feelsLike = current.temperature_2m - (current.windspeed_10m * 0.2) + (current.relativehumidity_2m * 0.1);
+  // **حساب درجة الحرارة المحسوسة بالمعادلة الصحيحة**
+  // Feels Like = 13.12 + 0.6215*T - 11.37*(v^0.16) + 0.3965*T*(v^0.16)
+  const T = current.temperature_2m;
+  const v = current.windspeed_10m;
+  const vPow = Math.pow(v, 0.16);
+  const feelsLike = 13.12 + (0.6215 * T) - (11.37 * vPow) + (0.3965 * T * vPow);
 
   return (
     <div className="bg-white/40 backdrop-blur-md rounded-3xl p-6 shadow-xl mx-4 mt-6">
@@ -34,26 +37,26 @@ const CurrentWeatherComponent: React.FC<Props> = ({ current, modelTemps, locatio
           </div>
         </div>
 
-        {/* درجات الحرارة من النماذج مع أعلام أسفل */}
+        {/* درجات الحرارة من النماذج مع أعلام الدول (وليس حروف) */}
         <div className="col-span-1 grid grid-cols-3 gap-2">
           <div className="bg-blue-50/70 rounded-xl p-3 text-center">
             <div className="text-sm font-semibold text-gray-700">ECMWF</div>
             <div className="text-2xl font-semibold my-1">{modelTemps.ecmwf?.toFixed(1) ?? '—'}°</div>
-            <div className="text-2xl">🇪🇺</div>
+            <div className="text-3xl">🇪🇺</div>
           </div>
           <div className="bg-blue-50/70 rounded-xl p-3 text-center">
             <div className="text-sm font-semibold text-gray-700">GFS</div>
             <div className="text-2xl font-semibold my-1">{modelTemps.gfs?.toFixed(1) ?? '—'}°</div>
-            <div className="text-2xl">🇺🇸</div>
+            <div className="text-3xl">🇺🇸</div>
           </div>
           <div className="bg-blue-50/70 rounded-xl p-3 text-center">
             <div className="text-sm font-semibold text-gray-700">ICON</div>
             <div className="text-2xl font-semibold my-1">{modelTemps.icon?.toFixed(1) ?? '—'}°</div>
-            <div className="text-2xl">🇩🇪</div>
+            <div className="text-3xl">🇩🇪</div>
           </div>
         </div>
 
-        {/* المؤشرات الأربعة: مطر، رطوبة، رياح، الحرارة المحسوسة (بدلاً من التساقط) */}
+        {/* المؤشرات الأربعة مع الرموز */}
         <div className="col-span-1 grid grid-cols-2 gap-3">
           <div className="bg-white/60 rounded-xl p-3 flex items-center gap-2">
             <span className="text-2xl">☔</span>
