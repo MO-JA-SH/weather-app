@@ -5,13 +5,29 @@ import Forecast from './components/Forecast';
 import LoadingSpinner from './components/LoadingSpinner';
 import { fetchWeatherData, searchCity } from './services/weatherService';
 import { WeatherData, Coordinates, GeocodingResult } from './types';
-import PageViewCount from 'react-page-view-count'; // استيراد مكتبة العداد
 
 function App() {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [locationName, setLocationName] = useState<string>('');
+  const [visitorCount, setVisitorCount] = useState<number | null>(null); // حالة العداد
+
+  // جلب عدد الزوار من CountAPI
+  useEffect(() => {
+    const fetchVisitorCount = async () => {
+      try {
+        // استخدم معرف فريد لتطبيقك (يمكنك تغيير "weather-app" إلى أي اسم تريده)
+        const response = await fetch('https://api.countapi.xyz/hit/mo-ja-sh-weather-app/visitors');
+        const data = await response.json();
+        setVisitorCount(data.value);
+      } catch (error) {
+        console.error('فشل جلب عدد الزوار:', error);
+        setVisitorCount(0); // قيمة افتراضية في حال فشل الاتصال
+      }
+    };
+    fetchVisitorCount();
+  }, []); // يتم التشغيل مرة واحدة عند تحميل الصفحة
 
   const loadWeather = useCallback(async (coords: Coordinates) => {
     setLoading(true);
@@ -111,7 +127,7 @@ function App() {
         <div>BY MOHAMMED JAFER ALSHOUHA © {new Date().getFullYear()}</div>
         <div className="mt-2 text-white/80 flex items-center justify-center gap-2">
           <span>👥</span>
-          <PageViewCount loadingPlaceholder="..." />
+          <span>إجمالي الزوار: {visitorCount !== null ? visitorCount : '...'}</span>
         </div>
       </footer>
     </div>
