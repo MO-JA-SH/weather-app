@@ -11,19 +11,27 @@ function App() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [locationName, setLocationName] = useState<string>('');
-  const [visitorCount, setVisitorCount] = useState<number | null>(null); // حالة العداد
+  const [visitorCount, setVisitorCount] = useState<number | null>(null);
 
-  // جلب عدد الزوار من CountAPI
+  // جلب عدد الزوار (نسخة محسنة - تزيد مع كل زيارة)
   useEffect(() => {
     const fetchVisitorCount = async () => {
       try {
-        // استخدم معرف فريد لتطبيقك (يمكنك تغيير "weather-app" إلى أي اسم تريده)
+        // استخدام معرف فريد لتطبيقك (لا تغيره)
         const response = await fetch('https://api.countapi.xyz/hit/mo-ja-sh-weather-app/visitors');
         const data = await response.json();
         setVisitorCount(data.value);
       } catch (error) {
         console.error('فشل جلب عدد الزوار:', error);
-        setVisitorCount(0); // قيمة افتراضية في حال فشل الاتصال
+        // في حالة الفشل، نحاول استخدام عداد محلي (للتجربة)
+        try {
+          const localCount = localStorage.getItem('visitorCount');
+          const newCount = localCount ? parseInt(localCount) + 1 : 1;
+          localStorage.setItem('visitorCount', newCount.toString());
+          setVisitorCount(newCount);
+        } catch (e) {
+          setVisitorCount(0);
+        }
       }
     };
     fetchVisitorCount();
@@ -127,7 +135,7 @@ function App() {
         <div>BY MOHAMMED JAFER ALSHOUHA © {new Date().getFullYear()}</div>
         <div className="mt-2 text-white/80 flex items-center justify-center gap-2">
           <span>👥</span>
-          <span>إجمالي الزوار: {visitorCount !== null ? visitorCount : '...'}</span>
+          <span>إجمالي الزوار: {visitorCount !== null ? visitorCount.toLocaleString() : '...'}</span>
         </div>
       </footer>
     </div>
