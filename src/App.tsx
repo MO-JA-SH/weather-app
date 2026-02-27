@@ -103,7 +103,7 @@ function App() {
     <div className={`min-h-screen pb-8 transition-all duration-1000 ${backgroundClass} flex flex-col`}>
       {/* العلامة المائية في الأعلى */}
       <header className="text-center py-2 bg-black/20 backdrop-blur-sm text-white text-sm font-medium">
-        <span>MOHAMMED JAFER ALSHOUHA</span>
+        <span>by MOHAMMED JAFER ALSHOUHA</span>
       </header>
 
       {/* المحتوى الرئيسي */}
@@ -128,7 +128,7 @@ function App() {
 
       {/* العلامة المائية في الأسفل */}
       <footer className="text-center py-3 bg-black/20 backdrop-blur-sm text-white text-xs mt-6">
-        <span>تم التطوير بواسطة MOHAMMED JAFER ALSHOUHA © {new Date().getFullYear()}</span>
+        <span>by MOHAMMED JAFER ALSHOUHA © {new Date().getFullYear()}</span>
       </footer>
     </div>
   );
