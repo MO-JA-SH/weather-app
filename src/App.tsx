@@ -12,26 +12,22 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [locationName, setLocationName] = useState<string>('');
   const [visitorCount, setVisitorCount] = useState<number | null>(null);
+  const [countError, setCountError] = useState<boolean>(false);
 
-  // جلب عدد الزوار (نسخة محسنة - تزيد مع كل زيارة)
+  // جلب عدد الزوار من CountAPI (مركزي وحقيقي)
   useEffect(() => {
     const fetchVisitorCount = async () => {
       try {
-        // استخدام معرف فريد لتطبيقك (لا تغيره)
+        // استخدم معرفًا فريدًا لتطبيقك (لا تغيره)
         const response = await fetch('https://api.countapi.xyz/hit/mo-ja-sh-weather-app/visitors');
+        if (!response.ok) throw new Error('فشل الاتصال بعداد الزوار');
         const data = await response.json();
         setVisitorCount(data.value);
       } catch (error) {
         console.error('فشل جلب عدد الزوار:', error);
-        // في حالة الفشل، نحاول استخدام عداد محلي (للتجربة)
-        try {
-          const localCount = localStorage.getItem('visitorCount');
-          const newCount = localCount ? parseInt(localCount) + 1 : 1;
-          localStorage.setItem('visitorCount', newCount.toString());
-          setVisitorCount(newCount);
-        } catch (e) {
-          setVisitorCount(0);
-        }
+        setCountError(true);
+        // في حالة الفشل، نعرض رسالة بدلاً من تعطيل العداد
+        setVisitorCount(null);
       }
     };
     fetchVisitorCount();
@@ -135,7 +131,11 @@ function App() {
         <div>BY MOHAMMED JAFER ALSHOUHA © {new Date().getFullYear()}</div>
         <div className="mt-2 text-white/80 flex items-center justify-center gap-2">
           <span>👥</span>
-          <span>إجمالي الزوار: {visitorCount !== null ? visitorCount.toLocaleString() : '...'}</span>
+          {countError ? (
+            <span>عداد الزوار غير متاح حالياً</span>
+          ) : (
+            <span>إجمالي الزوار: {visitorCount !== null ? visitorCount.toLocaleString() : '...'}</span>
+          )}
         </div>
       </footer>
     </div>
