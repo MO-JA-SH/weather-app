@@ -22,7 +22,8 @@ const CurrentWeatherComponent: React.FC<Props> = ({ current, modelTemps, locatio
   return (
     <div className="bg-white/40 backdrop-blur-md rounded-3xl p-6 shadow-xl mx-4 mt-6">
       <h2 className="text-3xl font-bold text-gray-800 mb-2">{locationName}</h2>
-      <p className="text-gray-600 mb-4">{new Date(current.time).toLocaleString('ar')}</p>
+      {/* السطر المعدل: toLocaleDateString بدلاً من toLocaleString */}
+      <p className="text-gray-600 mb-4">{new Date(current.time).toLocaleDateString('ar')}</p>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* أيقونة ودرجة الحرارة الرئيسية + المحسوسة */}
@@ -37,7 +38,7 @@ const CurrentWeatherComponent: React.FC<Props> = ({ current, modelTemps, locatio
           </div>
         </div>
 
-        {/* درجات الحرارة من النماذج مع أعلام الدول (وليس حروف) */}
+        {/* درجات الحرارة من النماذج مع أعلام الدول */}
         <div className="col-span-1 grid grid-cols-3 gap-2">
           <div className="bg-blue-50/70 rounded-xl p-3 text-center">
             <div className="text-sm font-semibold text-gray-700">ECMWF</div>
