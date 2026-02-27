@@ -92,7 +92,6 @@ function App() {
     getUserLocation();
   }, [getUserLocation]);
 
-  // تحديث الخلفية عند تغير الطقس
   useEffect(() => {
     if (weather) {
       const bg = getWeatherBackground(weather.current.weathercode);
@@ -101,23 +100,36 @@ function App() {
   }, [weather]);
 
   return (
-    <div className={`min-h-screen pb-8 transition-all duration-1000 ${backgroundClass}`}>
-      <SearchBar onSearch={handleSearch} onUseLocation={getUserLocation} isLoading={loading} />
+    <div className={`min-h-screen pb-8 transition-all duration-1000 ${backgroundClass} flex flex-col`}>
+      {/* العلامة المائية في الأعلى */}
+      <header className="text-center py-2 bg-black/20 backdrop-blur-sm text-white text-sm font-medium">
+        <span>MOHAMMED JAFER ALSHOUHA</span>
+      </header>
 
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mx-4 mt-4">
-          {error}
-        </div>
-      )}
+      {/* المحتوى الرئيسي */}
+      <main className="flex-1">
+        <SearchBar onSearch={handleSearch} onUseLocation={getUserLocation} isLoading={loading} />
 
-      {loading && <LoadingSpinner />}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mx-4 mt-4">
+            {error}
+          </div>
+        )}
 
-      {!loading && weather && (
-        <>
-          <CurrentWeather current={weather.current} modelTemps={weather.modelTemps} locationName={locationName} />
-          <Forecast daily={weather.daily} />
-        </>
-      )}
+        {loading && <LoadingSpinner />}
+
+        {!loading && weather && (
+          <>
+            <CurrentWeather current={weather.current} modelTemps={weather.modelTemps} locationName={locationName} />
+            <Forecast daily={weather.daily} />
+          </>
+        )}
+      </main>
+
+      {/* العلامة المائية في الأسفل */}
+      <footer className="text-center py-3 bg-black/20 backdrop-blur-sm text-white text-xs mt-6">
+        <span>تم التطوير بواسطة MOHAMMED JAFER ALSHOUHA © {new Date().getFullYear()}</span>
+      </footer>
     </div>
   );
 }
