@@ -3,7 +3,7 @@ import { CurrentWeather, ModelTemperature } from '../types';
 import { getWeatherIcon, getWeatherDescription } from '../constants';
 import { WiRain, WiHumidity, WiStrongWind, WiThermometer } from 'react-icons/wi';
 import { FiFlag } from 'react-icons/fi';
-import { BsThermometerHalf } from 'react-icons/bs'; // أيقونة بديلة للحرارة المحسوسة
+import { IoThermometer } from 'react-icons/io5'; // أيقونة حرارة من io5
 
 interface Props {
   current: CurrentWeather;
@@ -38,7 +38,7 @@ const CurrentWeatherComponent: React.FC<Props> = ({ current, modelTemps, locatio
             <div className="text-5xl font-light">{current.temperature_2m.toFixed(1)}°C</div>
             <div className="text-gray-700">{weatherDesc}</div>
             <div className="text-sm text-gray-600 mt-1 flex items-center gap-1">
-              <BsThermometerHalf className="inline text-lg" /> محسوسة: {feelsLike.toFixed(1)}°C
+              <IoThermometer className="inline text-lg" /> محسوسة: {feelsLike.toFixed(1)}°C
             </div>
           </div>
         </div>
