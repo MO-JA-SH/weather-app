@@ -32,7 +32,7 @@ export async function fetchWeatherData(coords: Coordinates): Promise<WeatherData
   url.searchParams.set('latitude', lat.toString());
   url.searchParams.set('longitude', lon.toString());
   url.searchParams.set('timezone', 'auto');
-  url.searchParams.set('forecast_days', '16'); // <-- التغيير هنا: 7 → 16
+  url.searchParams.set('forecast_days', '16');
   url.searchParams.set('models', 'ecmwf_ifs,gfs_seamless,icon_seamless');
   url.searchParams.set('hourly', 'temperature_2m,relativehumidity_2m,precipitation,rain,windspeed_10m,weathercode');
   url.searchParams.set('daily', 'weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum');
@@ -45,21 +45,49 @@ export async function fetchWeatherData(coords: Coordinates): Promise<WeatherData
     }
     const data = await res.json();
 
-    // تحديد مؤشر الساعة الحالية
+    // **تحسين اختيار أقرب ساعة متوقعة للوقت الحالي**
     const now = new Date();
-    const currentHourStr = now.toISOString().slice(0, 13);
-    const timeIndex = data.hourly.time.findIndex((t: string) => t.startsWith(currentHourStr));
-    const idx = timeIndex >= 0 ? timeIndex : 0;
+    const currentHourStr = now.toISOString().slice(0, 13); // مثلاً "2026-02-27T03"
+    
+    // نبحث عن فهرس الساعة الحالية بالضبط
+    let idx = data.hourly.time.findIndex((t: string) => t.startsWith(currentHourStr));
+    
+    // إذا لم نجد، نبحث عن أول ساعة متوقعة بعد الوقت الحالي
+    if (idx === -1) {
+      const nowTime = now.getTime();
+      for (let i = 0; i < data.hourly.time.length; i++) {
+        const forecastTime = new Date(data.hourly.time[i]).getTime();
+        if (forecastTime >= nowTime) {
+          idx = i;
+          break;
+        }
+      }
+    }
+    // إذا لم نجد أي ساعة تالية، نأخذ أول ساعة
+    if (idx === -1) idx = 0;
 
+    // استخراج درجات الحرارة من النماذج المختلفة لحساب المتوسط
+    const tempEcmwf = data.hourly.temperature_2m_ecmwf_ifs?.[idx];
+    const tempGfs = data.hourly.temperature_2m_gfs_seamless?.[idx];
+    const tempIcon = data.hourly.temperature_2m_icon_seamless?.[idx];
+
+    // **حساب متوسط درجات الحرارة (تجاهل القيم null)**
+    const validTemps = [tempEcmwf, tempGfs, tempIcon].filter(t => t !== null && t !== undefined);
+    const avgTemp = validTemps.length > 0 
+      ? validTemps.reduce((sum, t) => sum + t, 0) / validTemps.length 
+      : tempEcmwf ?? 0;
+
+    // تجهيز بيانات النماذج للعرض
     const modelTemps: ModelTemperature = {
-      ecmwf: data.hourly.temperature_2m_ecmwf_ifs?.[idx] ?? null,
-      gfs: data.hourly.temperature_2m_gfs_seamless?.[idx] ?? null,
-      icon: data.hourly.temperature_2m_icon_seamless?.[idx] ?? null,
+      ecmwf: tempEcmwf ?? null,
+      gfs: tempGfs ?? null,
+      icon: tempIcon ?? null,
     };
 
+    // **استخدام المتوسط في درجة الحرارة الرئيسية**
     const current: CurrentWeather = {
       time: data.hourly.time[idx],
-      temperature_2m: data.hourly.temperature_2m_ecmwf_ifs?.[idx] ?? 0,
+      temperature_2m: avgTemp,
       weathercode: data.hourly.weathercode_ecmwf_ifs?.[idx] ?? 0,
       windspeed_10m: data.hourly.windspeed_10m_ecmwf_ifs?.[idx] ?? 0,
       relativehumidity_2m: data.hourly.relativehumidity_2m_ecmwf_ifs?.[idx] ?? 0,
@@ -67,6 +95,7 @@ export async function fetchWeatherData(coords: Coordinates): Promise<WeatherData
       rain: data.hourly.rain_ecmwf_ifs?.[idx] ?? 0,
     };
 
+    // التوقعات اليومية
     const daily: DailyForecast[] = [];
     for (let i = 0; i < data.daily.time.length; i++) {
       daily.push({
