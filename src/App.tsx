@@ -11,27 +11,49 @@ function App() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [locationName, setLocationName] = useState<string>('');
-  const [visitorCount, setVisitorCount] = useState<number | null>(null);
-  const [countError, setCountError] = useState<boolean>(false);
+  const [visitorStats, setVisitorStats] = useState({
+    total: null as number | null,
+    today: null as number | null,
+    unique: null as number | null,
+    loading: true,
+    error: false
+  });
 
-  // جلب عدد الزوار من CountAPI (مركزي وحقيقي)
+  // **عداد مركزي حقيقي باستخدام OpenCounterAPI**
   useEffect(() => {
     const fetchVisitorCount = async () => {
       try {
-        // استخدم معرفًا فريدًا لتطبيقك (لا تغيره)
-        const response = await fetch('https://api.countapi.xyz/hit/mo-ja-sh-weather-app/visitors');
+        // استخدم معرفًا فريدًا لتطبيقك
+        const response = await fetch('https://api.learntogoogle.de/counter/mo-ja-sh-weather-app');
+        
         if (!response.ok) throw new Error('فشل الاتصال بعداد الزوار');
+        
         const data = await response.json();
-        setVisitorCount(data.value);
+        setVisitorStats({
+          total: data.total || null,
+          today: data.today || null,
+          unique: data.unique || null,
+          loading: false,
+          error: false
+        });
+        
+        // تسجيل الزيارة (زيادة العداد)
+        await fetch('https://api.learntogoogle.de/counter/mo-ja-sh-weather-app/hit', { 
+          method: 'POST' 
+        });
+        
       } catch (error) {
         console.error('فشل جلب عدد الزوار:', error);
-        setCountError(true);
-        // في حالة الفشل، نعرض رسالة بدلاً من تعطيل العداد
-        setVisitorCount(null);
+        setVisitorStats(prev => ({
+          ...prev,
+          loading: false,
+          error: true
+        }));
       }
     };
+    
     fetchVisitorCount();
-  }, []); // يتم التشغيل مرة واحدة عند تحميل الصفحة
+  }, []); // يتفعل مرة واحدة عند تحميل الصفحة
 
   const loadWeather = useCallback(async (coords: Coordinates) => {
     setLoading(true);
@@ -126,15 +148,26 @@ function App() {
         )}
       </main>
 
-      {/* العلامة المائية في الأسفل مع عداد الزوار */}
+      {/* العلامة المائية في الأسفل مع عداد الزوار المركزي */}
       <footer className="text-center py-3 bg-black/30 backdrop-blur-sm text-white text-xs font-semibold tracking-wider mt-6">
         <div>BY MOHAMMED JAFER ALSHOUHA © {new Date().getFullYear()}</div>
-        <div className="mt-2 text-white/80 flex items-center justify-center gap-2">
-          <span>👥</span>
-          {countError ? (
-            <span>عداد الزوار غير متاح حالياً</span>
+        <div className="mt-2 text-white/80 flex flex-col items-center justify-center gap-1">
+          {visitorStats.loading ? (
+            <span>جاري تحميل إحصائيات الزوار...</span>
+          ) : visitorStats.error ? (
+            <span className="text-yellow-200">عداد الزوار غير متاح مؤقتاً</span>
           ) : (
-            <span>إجمالي الزوار: {visitorCount !== null ? visitorCount.toLocaleString() : '...'}</span>
+            <>
+              <div className="flex items-center gap-2">
+                <span>👥</span>
+                <span>إجمالي الزوار: {visitorStats.total?.toLocaleString()}</span>
+              </div>
+              <div className="flex items-center gap-4 text-xs opacity-80">
+                <span>اليوم: {visitorStats.today?.toLocaleString()}</span>
+                <span>|</span>
+                <span>زوار فريدين: {visitorStats.unique?.toLocaleString()}</span>
+              </div>
+            </>
           )}
         </div>
       </footer>
