@@ -101,9 +101,9 @@ function App() {
 
   return (
     <div className={`min-h-screen pb-8 transition-all duration-1000 ${backgroundClass} flex flex-col`}>
-      {/* العلامة المائية في الأعلى */}
-      <header className="text-center py-2 bg-black/20 backdrop-blur-sm text-white text-sm font-medium">
-        <span>by MOHAMMED JAFER ALSHOUHA</span>
+      {/* العلامة المائية في الأعلى - اسمك بحروف كبيرة */}
+      <header className="text-center py-3 bg-black/30 backdrop-blur-sm text-white text-sm font-bold tracking-wider">
+        MOHAMMED JAFER ALSHOUHA
       </header>
 
       {/* المحتوى الرئيسي */}
@@ -126,9 +126,9 @@ function App() {
         )}
       </main>
 
-      {/* العلامة المائية في الأسفل */}
-      <footer className="text-center py-3 bg-black/20 backdrop-blur-sm text-white text-xs mt-6">
-        <span>by MOHAMMED JAFER ALSHOUHA © {new Date().getFullYear()}</span>
+      {/* العلامة المائية في الأسفل - حقوق النشر */}
+      <footer className="text-center py-3 bg-black/30 backdrop-blur-sm text-white text-xs font-semibold tracking-wider mt-6">
+        BY MOHAMMED JAFER ALSHOUHA © {new Date().getFullYear()}
       </footer>
     </div>
   );

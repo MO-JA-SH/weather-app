@@ -23,8 +23,8 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onUseLocation, isLoadin
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="ابحث عن مدينة... (بالإنجليزية فقط، مثل: Amman)"
-          className="flex-1 px-4 py-3 rounded-xl border-0 focus:ring-2 focus:ring-blue-400 bg-white/80 shadow-inner"
+          placeholder="Enter city name in English (e.g. Amman)"
+          className="flex-1 px-4 py-3 rounded-xl border-0 focus:ring-2 focus:ring-blue-400 bg-white/80 shadow-inner text-gray-800"
           disabled={isLoading}
         />
         <button
