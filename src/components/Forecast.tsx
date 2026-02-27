@@ -9,8 +9,8 @@ interface Props {
 const Forecast: React.FC<Props> = ({ daily }) => {
   return (
     <div className="bg-white/30 backdrop-blur-sm rounded-3xl p-6 shadow-xl mx-4 mt-6">
-      <h3 className="text-xl font-semibold text-gray-800 mb-4">توقعات 7 أيام</h3>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
+      <h3 className="text-xl font-semibold text-gray-800 mb-4">توقعات 16 يوم</h3>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-3">
         {daily.map((day, idx) => {
           const date = new Date(day.date);
           const weekday = date.toLocaleDateString('ar', { weekday: 'short' });
