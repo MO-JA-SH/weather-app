@@ -2,9 +2,8 @@ import React from 'react';
 import { CurrentWeather, ModelTemperature } from '../types';
 import { getWeatherIcon, getWeatherDescription } from '../constants';
 import { WiRain, WiHumidity, WiStrongWind, WiThermometer } from 'react-icons/wi';
-import { FaTemperatureHigh } from 'react-icons/fa';
-// استيراد أيقونات الأعلام من مجموعة Fi (Font Awesome 5)
-import { FiFlag } from 'react-icons/fi'; // سنستخدم رمز علم عام، أو يمكن استيراد أيقونات محددة لكل دولة إذا أردت
+import { FiFlag } from 'react-icons/fi';
+import { BsThermometerHalf } from 'react-icons/bs'; // أيقونة بديلة للحرارة المحسوسة
 
 interface Props {
   current: CurrentWeather;
@@ -39,7 +38,7 @@ const CurrentWeatherComponent: React.FC<Props> = ({ current, modelTemps, locatio
             <div className="text-5xl font-light">{current.temperature_2m.toFixed(1)}°C</div>
             <div className="text-gray-700">{weatherDesc}</div>
             <div className="text-sm text-gray-600 mt-1 flex items-center gap-1">
-              <FaTemperatureHigh className="inline text-lg" /> محسوسة: {feelsLike.toFixed(1)}°C
+              <BsThermometerHalf className="inline text-lg" /> محسوسة: {feelsLike.toFixed(1)}°C
             </div>
           </div>
         </div>
