@@ -79,23 +79,36 @@ function App() {
   }, [getUserLocation]);
 
   return (
-    <div className="min-h-screen pb-8 bg-gradient-to-br from-sky-50 to-blue-100">
-      <SearchBar onSearch={handleSearch} onUseLocation={getUserLocation} isLoading={loading} />
+    <div className="min-h-screen pb-8 bg-gradient-to-br from-sky-50 to-blue-100 flex flex-col">
+      {/* العلامة المائية في الأعلى */}
+      <header className="text-center py-3 bg-black/30 backdrop-blur-sm text-white text-sm font-bold tracking-wider">
+        MOHAMMED JAFER ALSHOUHA
+      </header>
 
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mx-4 mt-4">
-          {error}
-        </div>
-      )}
+      {/* المحتوى الرئيسي */}
+      <main className="flex-1">
+        <SearchBar onSearch={handleSearch} onUseLocation={getUserLocation} isLoading={loading} />
 
-      {loading && <LoadingSpinner />}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mx-4 mt-4">
+            {error}
+          </div>
+        )}
 
-      {!loading && weather && (
-        <>
-          <CurrentWeather current={weather.current} modelTemps={weather.modelTemps} locationName={locationName} />
-          <Forecast daily={weather.daily} />
-        </>
-      )}
+        {loading && <LoadingSpinner />}
+
+        {!loading && weather && (
+          <>
+            <CurrentWeather current={weather.current} modelTemps={weather.modelTemps} locationName={locationName} />
+            <Forecast daily={weather.daily} />
+          </>
+        )}
+      </main>
+
+      {/* العلامة المائية في الأسفل */}
+      <footer className="text-center py-3 bg-black/30 backdrop-blur-sm text-white text-xs font-semibold tracking-wider mt-6">
+        BY MOHAMMED JAFER ALSHOUHA © {new Date().getFullYear()}
+      </footer>
     </div>
   );
 }
