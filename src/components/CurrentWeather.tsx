@@ -1,6 +1,8 @@
 import React from 'react';
 import { CurrentWeather, ModelTemperature } from '../types';
 import { getWeatherIcon, getWeatherDescription } from '../constants';
+import { FaFlagUsa, FaFlagCheckered } from 'react-icons/fa'; // أيقونات أمريكية وأوروبية (تقريبية)
+import { GiEarthAmerica, GiEarthAfricaEurope, GiEarthAsiaOceania } from 'react-icons/gi'; // أيقونات رمزية للنماذج
 
 interface Props {
   current: CurrentWeather;
@@ -12,16 +14,16 @@ const CurrentWeatherComponent: React.FC<Props> = ({ current, modelTemps, locatio
   const weatherIcon = getWeatherIcon(current.weathercode);
   const weatherDesc = getWeatherDescription(current.weathercode);
 
-  // **حساب درجة الحرارة المحسوسة**
+  // حساب درجة الحرارة المحسوسة
   const T = current.temperature_2m;
   const v = current.windspeed_10m;
   const vPow = Math.pow(v, 0.16);
   const feelsLike = 13.12 + (0.6215 * T) - (11.37 * vPow) + (0.3965 * T * vPow);
 
-  // **تنسيق التاريخ يدوياً: يوم - شهر - سنة**
+  // تنسيق التاريخ
   const dateObj = new Date(current.time);
   const day = dateObj.getDate();
-  const month = dateObj.getMonth() + 1; // شهور من 0-11
+  const month = dateObj.getMonth() + 1;
   const year = dateObj.getFullYear();
   const formattedDate = `${day} - ${month} - ${year}`;
 
@@ -43,22 +45,31 @@ const CurrentWeatherComponent: React.FC<Props> = ({ current, modelTemps, locatio
           </div>
         </div>
 
-        {/* درجات الحرارة من النماذج مع أعلام الدول */}
+        {/* درجات الحرارة من النماذج مع أيقونات أعلام (SVG) */}
         <div className="col-span-1 grid grid-cols-3 gap-2">
           <div className="bg-blue-50/70 rounded-xl p-3 text-center">
             <div className="text-sm font-semibold text-gray-700">ECMWF</div>
             <div className="text-2xl font-semibold my-1">{modelTemps.ecmwf?.toFixed(1) ?? '—'}°</div>
-            <div className="text-3xl">🇪🇺</div>
+            <div className="text-3xl flex justify-center">
+              {/* أيقونة أوروبا */}
+              <GiEarthAfricaEurope className="text-blue-600" />
+            </div>
           </div>
           <div className="bg-blue-50/70 rounded-xl p-3 text-center">
             <div className="text-sm font-semibold text-gray-700">GFS</div>
             <div className="text-2xl font-semibold my-1">{modelTemps.gfs?.toFixed(1) ?? '—'}°</div>
-            <div className="text-3xl">🇺🇸</div>
+            <div className="text-3xl flex justify-center">
+              {/* أيقونة أمريكا */}
+              <FaFlagUsa className="text-red-600" />
+            </div>
           </div>
           <div className="bg-blue-50/70 rounded-xl p-3 text-center">
             <div className="text-sm font-semibold text-gray-700">ICON</div>
             <div className="text-2xl font-semibold my-1">{modelTemps.icon?.toFixed(1) ?? '—'}°</div>
-            <div className="text-3xl">🇩🇪</div>
+            <div className="text-3xl flex justify-center">
+              {/* أيقونة ألمانيا */}
+              <GiEarthEurope className="text-yellow-600" />
+            </div>
           </div>
         </div>
 
