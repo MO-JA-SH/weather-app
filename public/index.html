@@ -5,8 +5,250 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>تطبيق الطقس متعدد النماذج</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      min-height: 100vh;
+      transition: background 1s ease;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* ===== الخلفيات الأساسية ===== */
+    .sunny {
+      background: linear-gradient(145deg, #f9d423 0%, #ff8c5a 100%);
+    }
+    .partly-cloudy {
+      background: linear-gradient(135deg, #b6c5d9 0%, #8ca3b9 100%);
+    }
+    .cloudy {
+      background: linear-gradient(120deg, #9eb0c0 0%, #5d6f82 100%);
+    }
+    .foggy {
+      background: linear-gradient(135deg, #d3dae0 0%, #a3b1bf 100%);
+    }
+    .rainy {
+      background: linear-gradient(145deg, #4f6d8f 0%, #2b3e5c 100%);
+    }
+    .snowy {
+      background: linear-gradient(135deg, #e8f0f8 0%, #b0c4de 100%);
+    }
+    .stormy {
+      background: linear-gradient(145deg, #2f4f6f 0%, #1a2a3a 100%);
+    }
+    .default {
+      background: linear-gradient(145deg, #87CEEB 0%, #4682B4 100%);
+    }
+
+    /* ===== التأثيرات المتحركة المشتركة ===== */
+    .sunny, .partly-cloudy, .cloudy, .foggy, .rainy, .snowy, .stormy, .default {
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* طبقة شفافة لتحسين قراءة النص */
+    .sunny::after, .partly-cloudy::after, .cloudy::after, .foggy::after, 
+    .rainy::after, .snowy::after, .stormy::after, .default::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.1);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ضمان أن المحتوى فوق الخلفيات */
+    .sunny > *, .partly-cloudy > *, .cloudy > *, .foggy > *, 
+    .rainy > *, .snowy > *, .stormy > *, .default > * {
+      position: relative;
+      z-index: 10;
+    }
+
+    /* ===== تأثيرات خاصة بكل حالة ===== */
+
+    /* ☀️ مشمس - شمس متحركة */
+    .sunny::before {
+      content: '☀️';
+      position: absolute;
+      font-size: 150px;
+      top: -30px;
+      right: -30px;
+      opacity: 0.4;
+      animation: spin 20s linear infinite;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* ⛅ غائم جزئياً - غيوم بطيئة */
+    .partly-cloudy::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 200%;
+      height: 100%;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" opacity="0.2"><circle cx="30" cy="40" r="20" fill="white"/><circle cx="60" cy="35" r="25" fill="white"/><circle cx="90" cy="45" r="20" fill="white"/><circle cx="120" cy="30" r="15" fill="white"/></svg>') repeat-x;
+      background-size: 300px 150px;
+      animation: cloudsFloat 40s linear infinite;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* ☁️ غائم - غيوم كثيفة */
+    .cloudy::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 200%;
+      height: 100%;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" opacity="0.3"><circle cx="40" cy="45" r="25" fill="white"/><circle cx="80" cy="40" r="30" fill="white"/><circle cx="120" cy="50" r="25" fill="white"/><circle cx="160" cy="35" r="20" fill="white"/></svg>') repeat-x;
+      background-size: 350px 150px;
+      animation: cloudsFloat 60s linear infinite;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    @keyframes cloudsFloat {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    /* 🌫️ ضباب - ضباب متحرك */
+    .foggy::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 200%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        90deg,
+        rgba(255,255,255,0.3) 0px,
+        rgba(255,255,255,0.1) 50px,
+        rgba(255,255,255,0.3) 100px
+      );
+      animation: fogMove 15s linear infinite;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    @keyframes fogMove {
+      from { transform: translateX(0); }
+      to { transform: translateX(-30%); }
+    }
+
+    /* 🌧️ ممطر - قطرات مطر متساقطة */
+    .rainy::before {
+      content: '';
+      position: absolute;
+      top: -20%;
+      left: 0;
+      width: 100%;
+      height: 120%;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent,
+        transparent 15px,
+        rgba(255, 255, 255, 0.3) 16px,
+        transparent 17px
+      );
+      animation: rain 0.5s linear infinite;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    @keyframes rain {
+      from { transform: translateY(0); }
+      to { transform: translateY(30px); }
+    }
+
+    /* ❄️ ثلجي - رقاقات ثلج متساقطة */
+    .snowy::before {
+      content: '';
+      position: absolute;
+      top: -20%;
+      left: 0;
+      width: 100%;
+      height: 120%;
+      background: radial-gradient(circle at 10% 30%, rgba(255,255,255,0.8) 2px, transparent 3px);
+      background-size: 70px 70px;
+      animation: snow 8s linear infinite;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    @keyframes snow {
+      from { transform: translateY(0) rotate(0deg); }
+      to { transform: translateY(40px) rotate(10deg); }
+    }
+
+    /* ⛈️ عاصف - ومضات برق ورياح */
+    .stormy::before {
+      content: '';
+      position: absolute;
+      top: -20%;
+      left: 0;
+      width: 100%;
+      height: 120%;
+      background: repeating-linear-gradient(
+        45deg,
+        rgba(255,255,240,0.1) 0px,
+        rgba(255,255,240,0.3) 20px,
+        transparent 40px
+      );
+      animation: wind 3s linear infinite;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .stormy::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.1);
+      animation: lightning 4s infinite;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    @keyframes wind {
+      from { transform: translateX(0); }
+      to { transform: translateX(-20px); }
+    }
+
+    @keyframes lightning {
+      0%, 95%, 98% { opacity: 0; }
+      96%, 97% { opacity: 0.5; }
+    }
+
+    /* تحسين ظهور النصوص */
+    body, .text-gray-800, .text-gray-700, .text-gray-600 {
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    /* جعل البطاقات شفافة بشكل أنيق */
+    .bg-white\/40, .bg-white\/30, .bg-white\/70, .bg-white\/60, .bg-blue-50\/70 {
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.3);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+  </style>
 </head>
-<body class="bg-gradient-to-br from-sky-50 to-blue-100 min-h-screen">
+<body class="min-h-screen">
   <div id="root"></div>
 </body>
 </html>
