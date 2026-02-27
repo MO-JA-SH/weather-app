@@ -5,6 +5,7 @@ import Forecast from './components/Forecast';
 import LoadingSpinner from './components/LoadingSpinner';
 import { fetchWeatherData, searchCity } from './services/weatherService';
 import { WeatherData, Coordinates, GeocodingResult } from './types';
+import PageViewCount from 'react-page-view-count'; // استيراد مكتبة العداد
 
 function App() {
   const [weather, setWeather] = useState<WeatherData | null>(null);
@@ -105,9 +106,13 @@ function App() {
         )}
       </main>
 
-      {/* العلامة المائية في الأسفل */}
+      {/* العلامة المائية في الأسفل مع عداد الزوار */}
       <footer className="text-center py-3 bg-black/30 backdrop-blur-sm text-white text-xs font-semibold tracking-wider mt-6">
-        BY MOHAMMED JAFER ALSHOUHA © {new Date().getFullYear()}
+        <div>BY MOHAMMED JAFER ALSHOUHA © {new Date().getFullYear()}</div>
+        <div className="mt-2 text-white/80 flex items-center justify-center gap-2">
+          <span>👥</span>
+          <PageViewCount loadingPlaceholder="..." />
+        </div>
       </footer>
     </div>
   );
