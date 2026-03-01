@@ -11,6 +11,15 @@ interface Props {
 const HourlyForecastModal: React.FC<Props> = ({ isOpen, onClose, day }) => {
   if (!isOpen || !day) return null;
 
+  // دالة للتحقق مما إذا كانت بيانات النماذج موجودة (أي قيمة غير null)
+  const hasModelData = (hour: any) => {
+    return hour.modelTemps && (
+      hour.modelTemps.ecmwf !== null || 
+      hour.modelTemps.gfs !== null || 
+      hour.modelTemps.icon !== null
+    );
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white/90 rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -35,21 +44,25 @@ const HourlyForecastModal: React.FC<Props> = ({ isOpen, onClose, day }) => {
                   </div>
                   <div className="text-lg font-bold text-center mb-2">{hour.temperature_2m.toFixed(1)}°C</div>
                   
-                  <div className="grid grid-cols-3 gap-1 text-center text-xs mb-2">
-                    <div className="bg-blue-50 p-1 rounded">
-                      <div className="font-semibold">ECMWF</div>
-                      <div>{hour.modelTemps.ecmwf?.toFixed(1) ?? '—'}°</div>
+                  {/* عرض النماذج فقط إذا كانت موجودة (لمصدر Open-Meteo) */}
+                  {hasModelData(hour) && (
+                    <div className="grid grid-cols-3 gap-1 text-center text-xs mb-2">
+                      <div className="bg-blue-50 p-1 rounded">
+                        <div className="font-semibold">ECMWF</div>
+                        <div>{hour.modelTemps.ecmwf?.toFixed(1) ?? '—'}°</div>
+                      </div>
+                      <div className="bg-blue-50 p-1 rounded">
+                        <div className="font-semibold">GFS</div>
+                        <div>{hour.modelTemps.gfs?.toFixed(1) ?? '—'}°</div>
+                      </div>
+                      <div className="bg-blue-50 p-1 rounded">
+                        <div className="font-semibold">ICON</div>
+                        <div>{hour.modelTemps.icon?.toFixed(1) ?? '—'}°</div>
+                      </div>
                     </div>
-                    <div className="bg-blue-50 p-1 rounded">
-                      <div className="font-semibold">GFS</div>
-                      <div>{hour.modelTemps.gfs?.toFixed(1) ?? '—'}°</div>
-                    </div>
-                    <div className="bg-blue-50 p-1 rounded">
-                      <div className="font-semibold">ICON</div>
-                      <div>{hour.modelTemps.icon?.toFixed(1) ?? '—'}°</div>
-                    </div>
-                  </div>
+                  )}
                   
+                  {/* المؤشرات الإضافية: المطر، الرطوبة، الرياح، المطر (مرة أخرى) */}
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="bg-gray-50 p-1 rounded text-center">
                       <span className="text-gray-500">تساقط</span>
