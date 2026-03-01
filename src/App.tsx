@@ -6,7 +6,7 @@ import LoadingSpinner from './components/LoadingSpinner';
 import { fetchWeatherData, searchCity } from './services/weatherService';
 import { fetchWeatherApiComData } from './services/weatherApiComService';
 import { WeatherData, Coordinates, GeocodingResult } from './types';
-import { getWeatherDescription, convertWeatherApiCode } from './constants';
+import { getWeatherDescription, convertWeatherApiCode, getWeatherIcon } from './constants'; // <-- تأكد من وجود getWeatherIcon هنا
 
 interface CombinedWeatherData {
   openMeteo: WeatherData | null;
