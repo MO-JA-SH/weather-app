@@ -6,7 +6,7 @@ import LoadingSpinner from './components/LoadingSpinner';
 import { fetchWeatherData, searchCity } from './services/weatherService';
 import { fetchWeatherApiComData } from './services/weatherApiComService';
 import { WeatherData, Coordinates, GeocodingResult } from './types';
-import { getWeatherDescription, convertWeatherApiCode, getWeatherIcon } from './constants'; // <-- تأكد من وجود getWeatherIcon هنا
+import { getWeatherDescription, convertWeatherApiCode, getWeatherIcon } from './constants';
 
 interface CombinedWeatherData {
   openMeteo: WeatherData | null;
@@ -229,7 +229,7 @@ function App() {
                     className="w-full flex items-center justify-center gap-2 text-gray-800 hover:text-gray-900 bg-white/40 backdrop-blur-sm rounded-xl py-3 text-lg font-bold shadow-md hover:shadow-lg transition"
                   >
                     <span className="text-2xl">{showWeatherApiComForecast ? '▼' : '▶'}</span>
-                    <span>توقعات WeatherAPI.com (3 أيام)</span>
+                    <span>توقعات WeatherAPI.com</span>
                   </button>
                 </div>
 
