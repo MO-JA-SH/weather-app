@@ -40,6 +40,7 @@ function App() {
     }
   }, []);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const calculateFeelsLike = (temp: number, wind: number, humidity: number): number => {
     const v = wind;
     const vPow = Math.pow(v, 0.16);
