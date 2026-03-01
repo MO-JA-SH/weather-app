@@ -37,25 +37,28 @@ export async function fetchWeatherApiComData(coords: Coordinates): Promise<Weath
       return null;
     }
     const data = await res.json();
-
-    // التحقق من هيكل البيانات
     console.log('WeatherAPI.com raw data:', data);
 
-    // البيانات الحالية (موجودة في data.current)
-    const currentData = data.current;
+    // التحقق من وجود البيانات بالهيكل الصحيح
+    if (!data.current?.current) {
+      console.error('لا توجد بيانات حالية في الـ response', data);
+      return null;
+    }
 
-    // بيانات التوقعات (المسار الصحيح: data.forecast.forecast.forecastday)
-    const forecastData = data.forecast?.forecast?.forecastday;
+    // استخراج بيانات الطقس الحالي (المسار الصحيح: data.current.current)
+    const currentData = data.current.current;
 
-    if (!forecastData) {
-      console.error('لم يتم العثور على بيانات التوقعات في الـ response', data);
+    // استخراج بيانات التوقعات (المسار الصحيح: data.forecast.forecast.forecastday)
+    const forecastday = data.forecast?.forecast?.forecastday;
+    if (!forecastday || !Array.isArray(forecastday)) {
+      console.error('لا توجد بيانات توقعات في الـ response', data);
       return null;
     }
 
     // تحويل سرعة الرياح من كم/س إلى م/ث (تقريباً)
     const windSpeedMs = currentData.wind_kph * 0.27778;
 
-    const daily = forecastData.map((day: any) => ({
+    const daily = forecastday.map((day: any) => ({
       date: day.date + 'T12:00:00Z',
       weathercode: day.day.condition.code,
       temperature_2m_max: day.day.maxtemp_c,
