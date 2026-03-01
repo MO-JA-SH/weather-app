@@ -25,7 +25,6 @@ function App() {
   const [showOpenMeteoForecast, setShowOpenMeteoForecast] = useState<boolean>(false);
   const [showWeatherApiComForecast, setShowWeatherApiComForecast] = useState<boolean>(false);
 
-  // عداد محلي
   useEffect(() => {
     try {
       const storedCount = localStorage.getItem('visitorCount');
@@ -52,12 +51,19 @@ function App() {
         fetchWeatherApiComData(coords)
       ]);
 
-      // تحويل رموز WeatherAPI.com
+      // **تحويل رموز WeatherAPI.com**
       if (weatherApiComData) {
+        // تحويل الرمز الحالي
         weatherApiComData.current.weathercode = convertWeatherApiCode(weatherApiComData.current.weathercode);
+
+        // تحويل رموز التوقعات اليومية والساعات
         weatherApiComData.daily = weatherApiComData.daily.map((day: any) => ({
           ...day,
           weathercode: convertWeatherApiCode(day.weathercode),
+          hourly: day.hourly?.map((hour: any) => ({
+            ...hour,
+            weathercode: convertWeatherApiCode(hour.weathercode),
+          })),
         }));
       }
 

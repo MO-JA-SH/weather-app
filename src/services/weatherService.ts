@@ -85,6 +85,29 @@ export async function fetchWeatherData(coords: Coordinates): Promise<WeatherData
       rain: data.hourly.rain_ecmwf_ifs?.[idx] ?? 0,
     };
 
+    // **تجهيز بيانات كل الساعات**
+    const allHourly: any[] = [];
+    for (let i = 0; i < data.hourly.time.length; i++) {
+      const hTempEcmwf = data.hourly.temperature_2m_ecmwf_ifs?.[i];
+      const hTempGfs = data.hourly.temperature_2m_gfs_seamless?.[i];
+      const hTempIcon = data.hourly.temperature_2m_icon_seamless?.[i];
+      
+      allHourly.push({
+        time: data.hourly.time[i],
+        temperature_2m: hTempEcmwf ?? 0,
+        weathercode: data.hourly.weathercode_ecmwf_ifs?.[i] ?? 0,
+        windspeed_10m: data.hourly.windspeed_10m_ecmwf_ifs?.[i] ?? 0,
+        relativehumidity_2m: data.hourly.relativehumidity_2m_ecmwf_ifs?.[i] ?? 0,
+        precipitation: data.hourly.precipitation_ecmwf_ifs?.[i] ?? 0,
+        rain: data.hourly.rain_ecmwf_ifs?.[i] ?? 0,
+        modelTemps: {
+          ecmwf: hTempEcmwf ?? null,
+          gfs: hTempGfs ?? null,
+          icon: hTempIcon ?? null,
+        },
+      });
+    }
+
     const daily: DailyForecast[] = [];
     for (let i = 0; i < data.daily.time.length; i++) {
       const maxEcmwf = data.daily.temperature_2m_max_ecmwf_ifs?.[i];
@@ -103,6 +126,10 @@ export async function fetchWeatherData(coords: Coordinates): Promise<WeatherData
       const precipGfs = data.daily.precipitation_sum_gfs_seamless?.[i] ?? null;
       const precipIcon = data.daily.precipitation_sum_icon_seamless?.[i] ?? null;
 
+      // **ربط الساعات بهذا اليوم**
+      const dayDate = data.daily.time[i].split('T')[0];
+      const dayHours = allHourly.filter(h => h.time.startsWith(dayDate));
+
       daily.push({
         date: data.daily.time[i],
         weathercode: data.daily.weathercode_ecmwf_ifs?.[i] ?? 0,
@@ -114,6 +141,7 @@ export async function fetchWeatherData(coords: Coordinates): Promise<WeatherData
           gfs: precipGfs,
           icon: precipIcon,
         },
+        hourly: dayHours, // **هذا هو المفتاح لعرض التفاصيل**
       });
     }
 
@@ -123,6 +151,7 @@ export async function fetchWeatherData(coords: Coordinates): Promise<WeatherData
       daily,
       timezone: data.timezone,
       locationName: name || 'الموقع الحالي',
+      allHourly,
     };
   } catch (err) {
     console.error('Weather fetch error:', err);

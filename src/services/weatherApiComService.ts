@@ -20,7 +20,7 @@ export interface WeatherApiComData {
     temperature_2m_max: number;
     temperature_2m_min: number;
     precipitation_sum: number;
-    hourly?: any[]; // إضافة بيانات الساعات
+    hourly?: any[];
   }[];
 }
 
@@ -38,7 +38,6 @@ export async function fetchWeatherApiComData(coords: Coordinates): Promise<Weath
       return null;
     }
     const data = await res.json();
-    console.log('WeatherAPI.com raw data:', data);
 
     if (!data.current?.current) {
       console.error('لا توجد بيانات حالية في الـ response', data);
@@ -54,21 +53,19 @@ export async function fetchWeatherApiComData(coords: Coordinates): Promise<Weath
 
     const windSpeedMs = currentData.wind_kph * 0.27778;
 
-    // تجهيز التوقعات اليومية مع بيانات الساعات
     const daily = forecastday.map((day: any) => {
       // تحويل بيانات الساعات إلى الشكل المطلوب للمودال
       const hourly = day.hour.map((hour: any) => {
-        // سرعة الرياح لكل ساعة (تحويل من كم/س إلى م/ث)
         const hourWindMs = hour.wind_kph * 0.27778;
         return {
           time: hour.time,
           temperature_2m: hour.temp_c,
-          weathercode: hour.condition.code,
+          weathercode: hour.condition.code, // الرمز الأصلي (يحتاج تحويل)
           windspeed_10m: hourWindMs,
           relativehumidity_2m: hour.humidity,
           precipitation: hour.precip_mm,
           rain: hour.precip_mm,
-          modelTemps: { // لا توجد نماذج متعددة، نضع null
+          modelTemps: {
             ecmwf: null,
             gfs: null,
             icon: null,
@@ -82,7 +79,7 @@ export async function fetchWeatherApiComData(coords: Coordinates): Promise<Weath
         temperature_2m_max: day.day.maxtemp_c,
         temperature_2m_min: day.day.mintemp_c,
         precipitation_sum: day.day.totalprecip_mm,
-        hourly: hourly, // إضافة بيانات الساعات
+        hourly: hourly,
       };
     });
 
