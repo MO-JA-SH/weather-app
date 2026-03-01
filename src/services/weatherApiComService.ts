@@ -20,6 +20,7 @@ export interface WeatherApiComData {
     temperature_2m_max: number;
     temperature_2m_min: number;
     precipitation_sum: number;
+    hourly?: any[]; // إضافة بيانات الساعات
   }[];
 }
 
@@ -39,32 +40,51 @@ export async function fetchWeatherApiComData(coords: Coordinates): Promise<Weath
     const data = await res.json();
     console.log('WeatherAPI.com raw data:', data);
 
-    // التحقق من وجود البيانات بالهيكل الصحيح
     if (!data.current?.current) {
       console.error('لا توجد بيانات حالية في الـ response', data);
       return null;
     }
 
-    // استخراج بيانات الطقس الحالي (المسار الصحيح: data.current.current)
     const currentData = data.current.current;
-
-    // استخراج بيانات التوقعات (المسار الصحيح: data.forecast.forecast.forecastday)
     const forecastday = data.forecast?.forecast?.forecastday;
     if (!forecastday || !Array.isArray(forecastday)) {
       console.error('لا توجد بيانات توقعات في الـ response', data);
       return null;
     }
 
-    // تحويل سرعة الرياح من كم/س إلى م/ث (تقريباً)
     const windSpeedMs = currentData.wind_kph * 0.27778;
 
-    const daily = forecastday.map((day: any) => ({
-      date: day.date + 'T12:00:00Z',
-      weathercode: day.day.condition.code,
-      temperature_2m_max: day.day.maxtemp_c,
-      temperature_2m_min: day.day.mintemp_c,
-      precipitation_sum: day.day.totalprecip_mm,
-    }));
+    // تجهيز التوقعات اليومية مع بيانات الساعات
+    const daily = forecastday.map((day: any) => {
+      // تحويل بيانات الساعات إلى الشكل المطلوب للمودال
+      const hourly = day.hour.map((hour: any) => {
+        // سرعة الرياح لكل ساعة (تحويل من كم/س إلى م/ث)
+        const hourWindMs = hour.wind_kph * 0.27778;
+        return {
+          time: hour.time,
+          temperature_2m: hour.temp_c,
+          weathercode: hour.condition.code,
+          windspeed_10m: hourWindMs,
+          relativehumidity_2m: hour.humidity,
+          precipitation: hour.precip_mm,
+          rain: hour.precip_mm,
+          modelTemps: { // لا توجد نماذج متعددة، نضع null
+            ecmwf: null,
+            gfs: null,
+            icon: null,
+          },
+        };
+      });
+
+      return {
+        date: day.date + 'T12:00:00Z',
+        weathercode: day.day.condition.code,
+        temperature_2m_max: day.day.maxtemp_c,
+        temperature_2m_min: day.day.mintemp_c,
+        precipitation_sum: day.day.totalprecip_mm,
+        hourly: hourly, // إضافة بيانات الساعات
+      };
+    });
 
     return {
       current: {
