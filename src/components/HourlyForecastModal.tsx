@@ -1,5 +1,5 @@
 import React from 'react';
-import { DailyForecast, HourlyForecast } from '../types';
+import { DailyForecast } from '../types';
 import { getWeatherIcon, getWeatherDescription } from '../constants';
 
 interface Props {
@@ -35,7 +35,6 @@ const HourlyForecastModal: React.FC<Props> = ({ isOpen, onClose, day }) => {
                   </div>
                   <div className="text-lg font-bold text-center mb-2">{hour.temperature_2m.toFixed(1)}°C</div>
                   
-                  {/* درجات الحرارة من النماذج الثلاثة */}
                   <div className="grid grid-cols-3 gap-1 text-center text-xs mb-2">
                     <div className="bg-blue-50 p-1 rounded">
                       <div className="font-semibold">ECMWF</div>
@@ -51,7 +50,6 @@ const HourlyForecastModal: React.FC<Props> = ({ isOpen, onClose, day }) => {
                     </div>
                   </div>
                   
-                  {/* مؤشرات إضافية */}
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="bg-gray-50 p-1 rounded text-center">
                       <span className="text-gray-500">تساقط</span>
