@@ -1,6 +1,5 @@
 import { Coordinates } from '../types';
 
-// استبدل هذا بالرابط الفعلي من Netlify
 const NETLIFY_FUNCTION_URL = 'https://celebrated-figolla-ce3d88.netlify.app/.netlify/functions/getWeatherAPI';
 
 export interface WeatherApiComData {
@@ -39,13 +38,24 @@ export async function fetchWeatherApiComData(coords: Coordinates): Promise<Weath
     }
     const data = await res.json();
 
-    const current = data.current;
-    const forecast = data.forecast;
+    // التحقق من هيكل البيانات
+    console.log('WeatherAPI.com raw data:', data);
+
+    // البيانات الحالية (موجودة في data.current)
+    const currentData = data.current;
+
+    // بيانات التوقعات (المسار الصحيح: data.forecast.forecast.forecastday)
+    const forecastData = data.forecast?.forecast?.forecastday;
+
+    if (!forecastData) {
+      console.error('لم يتم العثور على بيانات التوقعات في الـ response', data);
+      return null;
+    }
 
     // تحويل سرعة الرياح من كم/س إلى م/ث (تقريباً)
-    const windSpeedMs = current.wind_kph * 0.27778;
+    const windSpeedMs = currentData.wind_kph * 0.27778;
 
-    const daily = forecast.forecastday.map((day: any) => ({
+    const daily = forecastData.map((day: any) => ({
       date: day.date + 'T12:00:00Z',
       weathercode: day.day.condition.code,
       temperature_2m_max: day.day.maxtemp_c,
@@ -55,15 +65,15 @@ export async function fetchWeatherApiComData(coords: Coordinates): Promise<Weath
 
     return {
       current: {
-        time: current.last_updated,
-        temperature_2m: current.temp_c,
-        weathercode: current.condition.code,
+        time: currentData.last_updated,
+        temperature_2m: currentData.temp_c,
+        weathercode: currentData.condition.code,
         windspeed_10m: windSpeedMs,
-        relativehumidity_2m: current.humidity,
-        precipitation: current.precip_mm,
-        rain: current.precip_mm,
-        feelslike: current.feelslike_c,
-        condition: current.condition.text,
+        relativehumidity_2m: currentData.humidity,
+        precipitation: currentData.precip_mm,
+        rain: currentData.precip_mm,
+        feelslike: currentData.feelslike_c,
+        condition: currentData.condition.text,
       },
       daily,
     };
