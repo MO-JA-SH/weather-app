@@ -39,46 +39,43 @@ export async function fetchWeatherApiComData(coords: Coordinates): Promise<Weath
     }
     const data = await res.json();
 
+    // التحقق من وجود البيانات بالهيكل الصحيح
     if (!data.current?.current) {
-      console.error('لا توجد بيانات حالية في الـ response', data);
+      console.error('WeatherAPI.com: لا توجد بيانات حالية', data);
       return null;
     }
 
     const currentData = data.current.current;
     const forecastday = data.forecast?.forecast?.forecastday;
     if (!forecastday || !Array.isArray(forecastday)) {
-      console.error('لا توجد بيانات توقعات في الـ response', data);
+      console.error('WeatherAPI.com: لا توجد بيانات توقعات', data);
       return null;
     }
 
     const windSpeedMs = currentData.wind_kph * 0.27778;
 
+    // تجهيز التوقعات اليومية مع التحقق من وجود بيانات الساعات
     const daily = forecastday.map((day: any) => {
-      // تحويل بيانات الساعات إلى الشكل المطلوب للمودال
-      const hourly = day.hour.map((hour: any) => {
+      const hourly = day.hour?.map((hour: any) => {
         const hourWindMs = hour.wind_kph * 0.27778;
         return {
           time: hour.time,
           temperature_2m: hour.temp_c,
-          weathercode: hour.condition.code, // الرمز الأصلي (يحتاج تحويل)
+          weathercode: hour.condition?.code || 0,
           windspeed_10m: hourWindMs,
-          relativehumidity_2m: hour.humidity,
-          precipitation: hour.precip_mm,
-          rain: hour.precip_mm,
-          modelTemps: {
-            ecmwf: null,
-            gfs: null,
-            icon: null,
-          },
+          relativehumidity_2m: hour.humidity || 0,
+          precipitation: hour.precip_mm || 0,
+          rain: hour.precip_mm || 0,
+          modelTemps: { ecmwf: null, gfs: null, icon: null },
         };
-      });
+      }) || [];
 
       return {
         date: day.date + 'T12:00:00Z',
-        weathercode: day.day.condition.code,
-        temperature_2m_max: day.day.maxtemp_c,
-        temperature_2m_min: day.day.mintemp_c,
-        precipitation_sum: day.day.totalprecip_mm,
+        weathercode: day.day?.condition?.code || 0,
+        temperature_2m_max: day.day?.maxtemp_c || 0,
+        temperature_2m_min: day.day?.mintemp_c || 0,
+        precipitation_sum: day.day?.totalprecip_mm || 0,
         hourly: hourly,
       };
     });
@@ -87,13 +84,13 @@ export async function fetchWeatherApiComData(coords: Coordinates): Promise<Weath
       current: {
         time: currentData.last_updated,
         temperature_2m: currentData.temp_c,
-        weathercode: currentData.condition.code,
+        weathercode: currentData.condition?.code || 0,
         windspeed_10m: windSpeedMs,
-        relativehumidity_2m: currentData.humidity,
-        precipitation: currentData.precip_mm,
-        rain: currentData.precip_mm,
-        feelslike: currentData.feelslike_c,
-        condition: currentData.condition.text,
+        relativehumidity_2m: currentData.humidity || 0,
+        precipitation: currentData.precip_mm || 0,
+        rain: currentData.precip_mm || 0,
+        feelslike: currentData.feelslike_c || 0,
+        condition: currentData.condition?.text || 'غير معروف',
       },
       daily,
     };

@@ -21,7 +21,6 @@ export interface ModelTemperature {
   icon: number | null;
 }
 
-// **نوع جديد لكميات الأمطار من كل نموذج**
 export interface ModelPrecipitation {
   ecmwf: number | null;
   gfs: number | null;
@@ -42,10 +41,10 @@ export interface HourlyForecast {
 export interface DailyForecast {
   date: string;
   weathercode: number;
-  temperature_2m_max: number;      // متوسط النماذج
-  temperature_2m_min: number;       // متوسط النماذج
-  precipitation_sum: number;        // (سنحتفظ بها للمتوسط إذا أردت مستقبلاً)
-  modelPrecipitation: ModelPrecipitation; // كميات الأمطار لكل نموذج
+  temperature_2m_max: number;
+  temperature_2m_min: number;
+  precipitation_sum: number;
+  modelPrecipitation: ModelPrecipitation;
   hourly?: HourlyForecast[];
 }
 
