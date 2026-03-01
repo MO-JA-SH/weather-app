@@ -4,19 +4,22 @@ import CurrentWeather from './components/CurrentWeather';
 import Forecast from './components/Forecast';
 import LoadingSpinner from './components/LoadingSpinner';
 import { fetchWeatherData, searchCity } from './services/weatherService';
+import { fetchWeatherApiComData } from './services/weatherApiComService';
 import { fetchVisualCrossingData } from './services/visualCrossingService';
 import { WeatherData, Coordinates, GeocodingResult } from './types';
-import { getWeatherIcon } from './constants';
+import { getWeatherDescription, convertWeatherApiCode, getWeatherIcon } from './constants';
 
 interface CombinedWeatherData {
   openMeteo: WeatherData | null;
   visualCrossing: any | null;
+  weatherApiCom: any | null;
 }
 
 function App() {
   const [weather, setWeather] = useState<CombinedWeatherData>({
     openMeteo: null,
-    visualCrossing: null
+    visualCrossing: null,
+    weatherApiCom: null
   });
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,6 +27,7 @@ function App() {
   const [visitorCount, setVisitorCount] = useState<number>(0);
   const [showOpenMeteoForecast, setShowOpenMeteoForecast] = useState<boolean>(false);
   const [showVisualCrossingForecast, setShowVisualCrossingForecast] = useState<boolean>(false);
+  const [showWeatherApiComForecast, setShowWeatherApiComForecast] = useState<boolean>(false);
 
   useEffect(() => {
     try {
@@ -40,19 +44,43 @@ function App() {
     setLoading(true);
     setError(null);
     try {
-      const [openMeteoData, visualCrossingData] = await Promise.all([
+      const [openMeteoData, visualCrossingData, weatherApiComData] = await Promise.all([
         fetchWeatherData(coords).catch(err => { console.error('Open-Meteo فشل:', err); return null; }),
-        fetchVisualCrossingData(coords).catch(err => { console.error('Visual Crossing فشل:', err); return null; })
+        fetchVisualCrossingData(coords).catch(err => { console.error('Visual Crossing فشل:', err); return null; }),
+        fetchWeatherApiComData(coords).catch(err => { console.error('WeatherAPI.com فشل:', err); return null; })
       ]);
+
+      // معالجة بيانات WeatherAPI.com إذا وجدت
+      let processedWeatherApiCom = weatherApiComData;
+      if (weatherApiComData) {
+        processedWeatherApiCom = {
+          ...weatherApiComData,
+          current: {
+            ...weatherApiComData.current,
+            weathercode: convertWeatherApiCode(weatherApiComData.current.weathercode)
+          },
+          daily: weatherApiComData.daily.map((day: any) => ({
+            ...day,
+            weathercode: convertWeatherApiCode(day.weathercode),
+            hourly: day.hourly?.map((hour: any) => ({
+              ...hour,
+              weathercode: convertWeatherApiCode(hour.weathercode)
+            }))
+          }))
+        };
+      }
 
       setWeather({
         openMeteo: openMeteoData,
-        visualCrossing: visualCrossingData
+        visualCrossing: visualCrossingData,
+        weatherApiCom: processedWeatherApiCom
       });
 
       if (openMeteoData) {
         setLocationName(coords.name || openMeteoData.locationName);
       } else if (visualCrossingData) {
+        setLocationName(coords.name || 'الموقع الحالي');
+      } else if (processedWeatherApiCom) {
         setLocationName(coords.name || 'الموقع الحالي');
       } else {
         setError('تعذر جلب بيانات الطقس.');
@@ -132,6 +160,7 @@ function App() {
 
         {!loading && (
           <>
+            {/* Open-Meteo */}
             {weather.openMeteo && (
               <div className="mt-6">
                 <h2 className="text-xl font-bold text-gray-800 mx-4 mb-2">☀️ Open-Meteo</h2>
@@ -159,6 +188,7 @@ function App() {
               </div>
             )}
 
+            {/* Visual Crossing */}
             {weather.visualCrossing?.current && (
               <div className="mt-8">
                 <h2 className="text-xl font-bold text-gray-800 mx-4 mb-2">🌐 Visual Crossing</h2>
@@ -232,6 +262,85 @@ function App() {
                 {showVisualCrossingForecast && weather.visualCrossing.daily && weather.visualCrossing.daily.length > 0 && (
                   <div className="mx-4 p-2 bg-white/20 rounded-2xl shadow-lg">
                     <Forecast daily={weather.visualCrossing.daily} showModels={false} />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* WeatherAPI.com */}
+            {weather.weatherApiCom?.current && (
+              <div className="mt-8">
+                <h2 className="text-xl font-bold text-gray-800 mx-4 mb-2">🌍 WeatherAPI.com</h2>
+
+                <div className="bg-white/40 backdrop-blur-md rounded-3xl p-6 shadow-xl mx-4">
+                  <div className="flex items-center gap-4 mb-4">
+                    <span className="text-7xl">{getWeatherIcon(weather.weatherApiCom.current.weathercode)}</span>
+                    <div>
+                      <div className="text-5xl font-light">
+                        {weather.weatherApiCom.current.temperature_2m?.toFixed(1) ?? '?'}°C
+                      </div>
+                      <div className="text-gray-700">
+                        {weather.weatherApiCom.current.condition || getWeatherDescription(weather.weatherApiCom.current.weathercode)}
+                      </div>
+                      <div className="text-sm text-gray-600 mt-1 flex items-center gap-1">
+                        <span>🌡️</span> محسوسة: {weather.weatherApiCom.current.feelslike?.toFixed(1) ?? '?'}°C
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="bg-white/60 rounded-xl p-3 flex items-center gap-2">
+                      <span className="text-2xl">☔</span>
+                      <div>
+                        <div className="text-xs text-gray-500">مطر</div>
+                        <div className="text-lg font-medium">
+                          {weather.weatherApiCom.current.precipitation?.toFixed(1) ?? '0'} mm
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-white/60 rounded-xl p-3 flex items-center gap-2">
+                      <span className="text-2xl">💧</span>
+                      <div>
+                        <div className="text-xs text-gray-500">رطوبة</div>
+                        <div className="text-lg font-medium">
+                          {weather.weatherApiCom.current.relativehumidity_2m?.toFixed(0) ?? '?'}%
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-white/60 rounded-xl p-3 flex items-center gap-2">
+                      <span className="text-2xl">💨</span>
+                      <div>
+                        <div className="text-xs text-gray-500">رياح</div>
+                        <div className="text-lg font-medium">
+                          {weather.weatherApiCom.current.windspeed_10m?.toFixed(1) ?? '?'} km/h
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-white/60 rounded-xl p-3 flex items-center gap-2">
+                      <span className="text-2xl">🌡️</span>
+                      <div>
+                        <div className="text-xs text-gray-500">محسوسة</div>
+                        <div className="text-lg font-medium">
+                          {weather.weatherApiCom.current.feelslike?.toFixed(1) ?? '?'}°C
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mx-4 mt-4 mb-2">
+                  <button
+                    onClick={() => setShowWeatherApiComForecast(!showWeatherApiComForecast)}
+                    className="w-full flex items-center justify-center gap-2 text-gray-800 hover:text-gray-900 bg-white/40 backdrop-blur-sm rounded-xl py-3 text-lg font-bold shadow-md hover:shadow-lg transition"
+                  >
+                    <span className="text-2xl">{showWeatherApiComForecast ? '▼' : '▶'}</span>
+                    <span>توقعات WeatherAPI.com</span>
+                  </button>
+                </div>
+
+                {showWeatherApiComForecast && weather.weatherApiCom.daily && weather.weatherApiCom.daily.length > 0 && (
+                  <div className="mx-4 p-2 bg-white/20 rounded-2xl shadow-lg">
+                    <Forecast daily={weather.weatherApiCom.daily} showModels={false} />
                   </div>
                 )}
               </div>
