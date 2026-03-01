@@ -1,6 +1,4 @@
-import type { Handler, HandlerEvent, HandlerContext } from "@netlify/functions";
-
-const handler: Handler = async (event: HandlerEvent, context: HandlerContext) => {
+export const handler = async (event: any, context: any) => {
   // السماح بالطلبات فقط من موقع GitHub Pages والـ localhost
   const allowedOrigins = ['https://mo-ja-sh.github.io', 'http://localhost:3000'];
   const origin = event.headers.origin || event.headers.Origin || '';
@@ -58,5 +56,3 @@ const handler: Handler = async (event: HandlerEvent, context: HandlerContext) =>
     };
   }
 };
-
-export { handler };
