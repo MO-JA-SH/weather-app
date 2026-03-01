@@ -51,12 +51,30 @@ function App() {
     setLoading(true);
     setError(null);
     try {
+      // جلب كل مصدر بشكل مستقل (وليس Promise.all)
+      const openMeteoPromise = fetchWeatherData(coords).catch(err => {
+        console.error('Open-Meteo فشل:', err);
+        return null;
+      });
+
+      const weatherApiComPromise = fetchWeatherApiComData(coords).catch(err => {
+        console.error('WeatherAPI.com فشل:', err);
+        return null;
+      });
+
+      const visualCrossingPromise = fetchVisualCrossingData(coords).catch(err => {
+        console.error('Visual Crossing فشل:', err);
+        return null;
+      });
+
+      // انتظار جميع الوعود
       const [openMeteoData, weatherApiComData, visualCrossingData] = await Promise.all([
-        fetchWeatherData(coords),
-        fetchWeatherApiComData(coords),
-        fetchVisualCrossingData(coords)
+        openMeteoPromise,
+        weatherApiComPromise,
+        visualCrossingPromise
       ]);
 
+      // معالجة بيانات WeatherAPI.com إذا وجدت
       if (weatherApiComData) {
         weatherApiComData.current.weathercode = convertWeatherApiCode(weatherApiComData.current.weathercode);
         weatherApiComData.daily = weatherApiComData.daily.map((day: any) => ({
@@ -69,21 +87,26 @@ function App() {
         }));
       }
 
+      // تحديث الحالة
       setWeather({
         openMeteo: openMeteoData,
         weatherApiCom: weatherApiComData,
         visualCrossing: visualCrossingData
       });
 
+      // تعيين اسم الموقع (من أي مصدر متاح)
       if (openMeteoData) {
         setLocationName(coords.name || openMeteoData.locationName);
       } else if (weatherApiComData) {
         setLocationName(coords.name || 'الموقع الحالي');
       } else if (visualCrossingData) {
         setLocationName(coords.name || 'الموقع الحالي');
+      } else {
+        // إذا فشلت جميع المصادر
+        setError('تعذر جلب بيانات الطقس من جميع المصادر.');
       }
     } catch (err) {
-      setError('فشل جلب بيانات الطقس من أحد المصادر.');
+      setError('حدث خطأ غير متوقع أثناء جلب البيانات.');
       console.error(err);
     } finally {
       setLoading(false);
