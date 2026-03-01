@@ -159,18 +159,22 @@ function App() {
               </div>
             )}
 
-            {weather.visualCrossing && (
+            {weather.visualCrossing?.current && (
               <div className="mt-8">
                 <h2 className="text-xl font-bold text-gray-800 mx-4 mb-2">🌐 Visual Crossing</h2>
 
                 <div className="bg-white/40 backdrop-blur-md rounded-3xl p-6 shadow-xl mx-4">
                   <div className="flex items-center gap-4 mb-4">
-                    <span className="text-7xl">{getWeatherIcon(weather.visualCrossing.current.weathercode)}</span>
+                    <span className="text-7xl">
+                      {weather.visualCrossing.current.weathercode ? getWeatherIcon(weather.visualCrossing.current.weathercode) : '🌡️'}
+                    </span>
                     <div>
-                      <div className="text-5xl font-light">{weather.visualCrossing.current.temperature_2m.toFixed(1)}°C</div>
-                      <div className="text-gray-700">{weather.visualCrossing.current.condition}</div>
+                      <div className="text-5xl font-light">
+                        {weather.visualCrossing.current.temperature_2m?.toFixed(1) ?? '?'}°C
+                      </div>
+                      <div className="text-gray-700">{weather.visualCrossing.current.condition ?? ''}</div>
                       <div className="text-sm text-gray-600 mt-1 flex items-center gap-1">
-                        <span>🌡️</span> محسوسة: {weather.visualCrossing.current.feelslike.toFixed(1)}°C
+                        <span>🌡️</span> محسوسة: {weather.visualCrossing.current.feelslike?.toFixed(1) ?? '?'}°C
                       </div>
                     </div>
                   </div>
@@ -180,28 +184,36 @@ function App() {
                       <span className="text-2xl">☔</span>
                       <div>
                         <div className="text-xs text-gray-500">مطر</div>
-                        <div className="text-lg font-medium">{weather.visualCrossing.current.precipitation.toFixed(1)} mm</div>
+                        <div className="text-lg font-medium">
+                          {weather.visualCrossing.current.precipitation?.toFixed(1) ?? '0'} mm
+                        </div>
                       </div>
                     </div>
                     <div className="bg-white/60 rounded-xl p-3 flex items-center gap-2">
                       <span className="text-2xl">💧</span>
                       <div>
                         <div className="text-xs text-gray-500">رطوبة</div>
-                        <div className="text-lg font-medium">{weather.visualCrossing.current.relativehumidity_2m.toFixed(0)}%</div>
+                        <div className="text-lg font-medium">
+                          {weather.visualCrossing.current.relativehumidity_2m?.toFixed(0) ?? '?'}%
+                        </div>
                       </div>
                     </div>
                     <div className="bg-white/60 rounded-xl p-3 flex items-center gap-2">
                       <span className="text-2xl">💨</span>
                       <div>
                         <div className="text-xs text-gray-500">رياح</div>
-                        <div className="text-lg font-medium">{weather.visualCrossing.current.windspeed_10m.toFixed(1)} km/h</div>
+                        <div className="text-lg font-medium">
+                          {weather.visualCrossing.current.windspeed_10m?.toFixed(1) ?? '?'} km/h
+                        </div>
                       </div>
                     </div>
                     <div className="bg-white/60 rounded-xl p-3 flex items-center gap-2">
                       <span className="text-2xl">🌡️</span>
                       <div>
                         <div className="text-xs text-gray-500">محسوسة</div>
-                        <div className="text-lg font-medium">{weather.visualCrossing.current.feelslike.toFixed(1)}°C</div>
+                        <div className="text-lg font-medium">
+                          {weather.visualCrossing.current.feelslike?.toFixed(1) ?? '?'}°C
+                        </div>
                       </div>
                     </div>
                   </div>
