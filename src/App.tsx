@@ -168,6 +168,7 @@ function App() {
                   current={weather.openMeteo.current}
                   modelTemps={weather.openMeteo.modelTemps}
                   locationName={locationName}
+                  dailyForecast={weather.openMeteo.daily?.[0]} // <-- إضافة هذا
                 />
 
                 <div className="mx-4 mt-4 mb-2">

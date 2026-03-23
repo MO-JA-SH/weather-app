@@ -1,14 +1,15 @@
 import React from 'react';
-import { CurrentWeather, ModelTemperature } from '../types';
+import { CurrentWeather, ModelTemperature, DailyForecast } from '../types';
 import { getWeatherIcon, getWeatherDescription } from '../constants';
 
 interface Props {
   current: CurrentWeather;
   modelTemps: ModelTemperature;
   locationName: string;
+  dailyForecast?: DailyForecast; // إضافة هذا
 }
 
-const CurrentWeatherComponent: React.FC<Props> = ({ current, modelTemps, locationName }) => {
+const CurrentWeatherComponent: React.FC<Props> = ({ current, modelTemps, locationName, dailyForecast }) => {
   const weatherIcon = getWeatherIcon(current.weathercode);
   const weatherDesc = getWeatherDescription(current.weathercode);
 
@@ -25,7 +26,7 @@ const CurrentWeatherComponent: React.FC<Props> = ({ current, modelTemps, locatio
   const year = dateObj.getFullYear();
   const formattedDate = `${day} - ${month} - ${year}`;
 
-  // **جملة تلخيصية بالصيغة المطلوبة**
+  // **جملة تلخيصية بناءً على التوقعات اليومية (إذا وجدت)**
   const getWeatherDescriptionForSummary = (code: number): string => {
     if (code === 0) return 'مشمساً';
     if (code === 1 || code === 2) return 'غائماً جزئياً';
@@ -40,7 +41,9 @@ const CurrentWeatherComponent: React.FC<Props> = ({ current, modelTemps, locatio
     return 'متغيراً';
   };
 
-  const summaryText = `يتوقع أن يكون الطقس اليوم ${getWeatherDescriptionForSummary(current.weathercode)}، ودرجة الحرارة ${current.temperature_2m.toFixed(0)}°م.`;
+  const summaryText = dailyForecast
+    ? `يتوقع اليوم أن يكون الطقس ${getWeatherDescriptionForSummary(dailyForecast.weathercode)}، ودرجة الحرارة العظمى ${dailyForecast.temperature_2m_max.toFixed(0)}° والصغرى ${dailyForecast.temperature_2m_min.toFixed(0)}°.`
+    : `يتوقع أن يكون الطقس اليوم ${getWeatherDescriptionForSummary(current.weathercode)}، ودرجة الحرارة ${current.temperature_2m.toFixed(0)}°م.`;
 
   return (
     <div className="bg-white/40 backdrop-blur-md rounded-3xl p-6 shadow-xl mx-4 mt-6">
