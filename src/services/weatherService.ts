@@ -85,7 +85,7 @@ export async function fetchWeatherData(coords: Coordinates): Promise<WeatherData
       rain: data.hourly.rain_ecmwf_ifs?.[idx] ?? 0,
     };
 
-    // **تجهيز بيانات كل الساعات**
+    // تجهيز بيانات كل الساعات
     const allHourly: any[] = [];
     for (let i = 0; i < data.hourly.time.length; i++) {
       const hTempEcmwf = data.hourly.temperature_2m_ecmwf_ifs?.[i];
@@ -110,23 +110,30 @@ export async function fetchWeatherData(coords: Coordinates): Promise<WeatherData
 
     const daily: DailyForecast[] = [];
     for (let i = 0; i < data.daily.time.length; i++) {
+      // درجات الحرارة العظمى (متوسط)
       const maxEcmwf = data.daily.temperature_2m_max_ecmwf_ifs?.[i];
       const maxGfs = data.daily.temperature_2m_max_gfs_seamless?.[i];
       const maxIcon = data.daily.temperature_2m_max_icon_seamless?.[i];
       const validMax = [maxEcmwf, maxGfs, maxIcon].filter(t => t !== null && t !== undefined);
       const avgMax = validMax.length > 0 ? validMax.reduce((sum, t) => sum + t, 0) / validMax.length : maxEcmwf ?? 0;
 
+      // درجات الحرارة الصغرى (متوسط)
       const minEcmwf = data.daily.temperature_2m_min_ecmwf_ifs?.[i];
       const minGfs = data.daily.temperature_2m_min_gfs_seamless?.[i];
       const minIcon = data.daily.temperature_2m_min_icon_seamless?.[i];
       const validMin = [minEcmwf, minGfs, minIcon].filter(t => t !== null && t !== undefined);
       const avgMin = validMin.length > 0 ? validMin.reduce((sum, t) => sum + t, 0) / validMin.length : minEcmwf ?? 0;
 
+      // كمية الأمطار (متوسط) <-- التعديل المطلوب
       const precipEcmwf = data.daily.precipitation_sum_ecmwf_ifs?.[i] ?? null;
       const precipGfs = data.daily.precipitation_sum_gfs_seamless?.[i] ?? null;
       const precipIcon = data.daily.precipitation_sum_icon_seamless?.[i] ?? null;
+      const validPrecip = [precipEcmwf, precipGfs, precipIcon].filter(p => p !== null && p !== undefined);
+      const avgPrecip = validPrecip.length > 0 
+        ? validPrecip.reduce((sum, p) => sum + p, 0) / validPrecip.length 
+        : precipEcmwf ?? 0;
 
-      // **ربط الساعات بهذا اليوم**
+      // ربط الساعات بهذا اليوم
       const dayDate = data.daily.time[i].split('T')[0];
       const dayHours = allHourly.filter(h => h.time.startsWith(dayDate));
 
@@ -135,13 +142,13 @@ export async function fetchWeatherData(coords: Coordinates): Promise<WeatherData
         weathercode: data.daily.weathercode_ecmwf_ifs?.[i] ?? 0,
         temperature_2m_max: avgMax,
         temperature_2m_min: avgMin,
-        precipitation_sum: precipEcmwf ?? 0,
+        precipitation_sum: avgPrecip, // <-- الآن متوسط النماذج الثلاثة
         modelPrecipitation: {
           ecmwf: precipEcmwf,
           gfs: precipGfs,
           icon: precipIcon,
         },
-        hourly: dayHours, // **هذا هو المفتاح لعرض التفاصيل**
+        hourly: dayHours,
       });
     }
 
