@@ -25,34 +25,29 @@ const CurrentWeatherComponent: React.FC<Props> = ({ current, modelTemps, locatio
   const year = dateObj.getFullYear();
   const formattedDate = `${day} - ${month} - ${year}`;
 
-  // **جملة تلخيصية مختصرة**
-  const summaryText = (() => {
-    // وصف مختصر (بدون كلمة "رذاذ")
-    let shortDesc = '';
-    const code = current.weathercode;
-    if (code === 0) shortDesc = 'طقس اليوم مشمس';
-    else if (code === 1 || code === 2) shortDesc = 'طقس اليوم قليل الغيوم';
-    else if (code === 3) shortDesc = 'طقس اليوم غائم';
-    else if (code >= 45 && code <= 48) shortDesc = 'طقس اليوم ضبابي';
-    else if (code >= 51 && code <= 67) shortDesc = 'يتوقع اليوم أمطار خفيفة';
-    else if (code >= 61 && code <= 65) shortDesc = 'يتوقع اليوم أمطار متوسطة';
-    else if (code >= 71 && code <= 77) shortDesc = 'يتوقع اليوم ثلوج';
-    else if (code >= 80 && code <= 82) shortDesc = 'يتوقع اليوم زخات مطر';
-    else if (code >= 85 && code <= 86) shortDesc = 'يتوقع اليوم زخات ثلج';
-    else if (code >= 95 && code <= 99) shortDesc = 'يتوقع اليوم عواصف رعدية';
-    else shortDesc = 'طقس اليوم متغير';
+  // **جملة تلخيصية بالصيغة المطلوبة**
+  const getWeatherDescriptionForSummary = (code: number): string => {
+    if (code === 0) return 'مشمساً';
+    if (code === 1 || code === 2) return 'غائماً جزئياً';
+    if (code === 3) return 'غائماً';
+    if (code >= 45 && code <= 48) return 'ضبابياً';
+    if (code >= 51 && code <= 67) return 'ممطراً (خفيف)';
+    if (code >= 61 && code <= 65) return 'ممطراً';
+    if (code >= 71 && code <= 77) return 'ثلجياً';
+    if (code >= 80 && code <= 82) return 'ممطراً (زخات)';
+    if (code >= 85 && code <= 86) return 'ثلجياً (زخات)';
+    if (code >= 95 && code <= 99) return 'عاصفاً مع رعد';
+    return 'متغيراً';
+  };
 
-    const temp = current.temperature_2m.toFixed(0);
-    return `${shortDesc}، الحرارة ${temp}°`;
-  })();
+  const summaryText = `يتوقع أن يكون الطقس اليوم ${getWeatherDescriptionForSummary(current.weathercode)}، ودرجة الحرارة ${current.temperature_2m.toFixed(0)}°م.`;
 
   return (
     <div className="bg-white/40 backdrop-blur-md rounded-3xl p-6 shadow-xl mx-4 mt-6">
       <h2 className="text-3xl font-bold text-gray-800 mb-1">{locationName}</h2>
-      {/* الجملة التلخيصية */}
-      <div className="flex items-center gap-2 text-gray-700 mb-3 text-base">
-        <span className="text-2xl">{getWeatherIcon(current.weathercode)}</span>
-        <span>{summaryText}</span>
+      {/* الجملة التلخيصية باللون الأزرق الغامق */}
+      <div className="text-blue-700 text-base mb-2">
+        {summaryText}
       </div>
       <p className="text-gray-600 mb-4">{formattedDate}</p>
 
