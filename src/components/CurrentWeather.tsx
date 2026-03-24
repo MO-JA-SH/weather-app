@@ -39,12 +39,11 @@ const CurrentWeatherComponent: React.FC<Props> = ({ current, modelTemps, locatio
   };
 
   const LTR = "\u202A";
-  const PDF = "\u202C";
+const PDF = "\u202C";
 
-  const summaryText = dailyForecast
-    ? `“يتوقع اليوم أن يكون الطقس ${getWeatherDescriptionForSummary(dailyForecast.weathercode)}، ودرجة الحرارة العظمى ${LTR}${dailyForecast.temperature_2m_max.toFixed(0)}°م${PDF} والصغرى ${LTR}${dailyForecast.temperature_2m_min.toFixed(0)}°م${PDF}.”`
-    : `“يتوقع أن يكون الطقس اليوم ${getWeatherDescriptionForSummary(current.weathercode)}، ودرجة الحرارة ${LTR}${current.temperature_2m.toFixed(0)}°م${PDF}.”`;
-
+const summaryText = dailyForecast
+  ? `يتوقع اليوم أن يكون الطقس ${getWeatherDescriptionForSummary(dailyForecast.weathercode)}، ودرجة الحرارة العظمى ${LTR}${dailyForecast.temperature_2m_max.toFixed(0)}°م${PDF} والصغرى ${LTR}${dailyForecast.temperature_2m_min.toFixed(0)}°م${PDF}.`
+  : `يتوقع أن يكون الطقس اليوم ${getWeatherDescriptionForSummary(current.weathercode)}، ودرجة الحرارة ${LTR}${current.temperature_2m.toFixed(0)}°م${PDF}.`;
   return (
     <div className="bg-white/40 backdrop-blur-md rounded-3xl p-6 shadow-xl mx-4 mt-6">
       <h2 className="text-3xl font-bold text-gray-800 mb-1">{locationName}</h2>
