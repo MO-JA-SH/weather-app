@@ -1,6 +1,6 @@
 import { Coordinates } from '../types';
 
-const NETLIFY_FUNCTION_URL = 'https://celebrated-figolla-ce3d88.netlify.app/.netlify/functions/getWeatherAPI';
+const NETLIFY_FUNCTION_URL = 'https://your-site.pages.dev/functions/getWeatherAPI';
 
 export interface WeatherApiComData {
   current: {
