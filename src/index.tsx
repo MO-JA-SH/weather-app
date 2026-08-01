@@ -1,14 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App';  // <-- تأكد أن الاستيراد بهذا الشكل
+import App from './App';
+import './styles.css';
 
-const rootElement = document.getElementById('root');
-if (!rootElement) {
-  throw new Error('لم يتم العثور على عنصر الجذر');
-}
+const root = document.getElementById('root');
+if (!root) throw new Error('Root element was not found');
 
-const root = ReactDOM.createRoot(rootElement);
-root.render(
+ReactDOM.createRoot(root).render(
   <React.StrictMode>
     <App />
   </React.StrictMode>

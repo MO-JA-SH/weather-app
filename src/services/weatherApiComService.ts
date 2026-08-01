@@ -1,6 +1,10 @@
 import { Coordinates } from '../types';
 
-const NETLIFY_FUNCTION_URL = 'https://celebrated-figolla-ce3d88.netlify.app/.netlify/functions/getWeatherAPI';
+const FUNCTIONS_BASE = (
+  import.meta.env.VITE_WEATHER_FUNCTIONS_BASE ||
+  '/.netlify/functions'
+).replace(/\/$/, '');
+const NETLIFY_FUNCTION_URL = `${FUNCTIONS_BASE}/getWeatherAPI`;
 
 export interface WeatherApiComData {
   current: {
@@ -25,9 +29,12 @@ export interface WeatherApiComData {
 }
 
 export async function fetchWeatherApiComData(coords: Coordinates): Promise<WeatherApiComData | null> {
+  if (import.meta.env.DEV && !import.meta.env.VITE_WEATHER_FUNCTIONS_BASE) {
+    return null;
+  }
   const { lat, lon } = coords;
 
-  const url = new URL(NETLIFY_FUNCTION_URL);
+  const url = new URL(NETLIFY_FUNCTION_URL, window.location.origin);
   url.searchParams.set('lat', lat.toString());
   url.searchParams.set('lon', lon.toString());
 
@@ -52,21 +59,18 @@ export async function fetchWeatherApiComData(coords: Coordinates): Promise<Weath
       return null;
     }
 
-    const windSpeedMs = currentData.wind_kph * 0.27778;
-
     // تجهيز التوقعات اليومية مع التحقق من وجود بيانات الساعات
     const daily = forecastday.map((day: any) => {
       const hourly = day.hour?.map((hour: any) => {
-        const hourWindMs = hour.wind_kph * 0.27778;
         return {
           time: hour.time,
           temperature_2m: hour.temp_c,
           weathercode: hour.condition?.code || 0,
-          windspeed_10m: hourWindMs,
+          windspeed_10m: hour.wind_kph,
           relativehumidity_2m: hour.humidity || 0,
           precipitation: hour.precip_mm || 0,
           rain: hour.precip_mm || 0,
-          modelTemps: { ecmwf: null, gfs: null, icon: null },
+          modelTemps: { ecmwf: null, gfs: null, icon: null, gem: null, jma: null },
         };
       }) || [];
 
@@ -85,7 +89,7 @@ export async function fetchWeatherApiComData(coords: Coordinates): Promise<Weath
         time: currentData.last_updated,
         temperature_2m: currentData.temp_c,
         weathercode: currentData.condition?.code || 0,
-        windspeed_10m: windSpeedMs,
+        windspeed_10m: currentData.wind_kph,
         relativehumidity_2m: currentData.humidity || 0,
         precipitation: currentData.precip_mm || 0,
         rain: currentData.precip_mm || 0,

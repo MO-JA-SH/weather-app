@@ -1,6 +1,10 @@
 import { Coordinates } from '../types';
 
-const NETLIFY_FUNCTION_URL = 'https://celebrated-figolla-ce3d88.netlify.app/.netlify/functions/getVisualCrossing';
+const FUNCTIONS_BASE = (
+  import.meta.env.VITE_WEATHER_FUNCTIONS_BASE ||
+  '/.netlify/functions'
+).replace(/\/$/, '');
+const NETLIFY_FUNCTION_URL = `${FUNCTIONS_BASE}/getVisualCrossing`;
 
 export interface VisualCrossingData {
   current: {
@@ -43,9 +47,12 @@ function getWeatherCodeFromIcon(icon: string): number {
 }
 
 export async function fetchVisualCrossingData(coords: Coordinates): Promise<VisualCrossingData | null> {
+  if (import.meta.env.DEV && !import.meta.env.VITE_WEATHER_FUNCTIONS_BASE) {
+    return null;
+  }
   const { lat, lon } = coords;
 
-  const url = new URL(NETLIFY_FUNCTION_URL);
+  const url = new URL(NETLIFY_FUNCTION_URL, window.location.origin);
   url.searchParams.set('lat', lat.toString());
   url.searchParams.set('lon', lon.toString());
 
@@ -63,18 +70,16 @@ export async function fetchVisualCrossingData(coords: Coordinates): Promise<Visu
     }
 
     const currentData = data.currentConditions;
-    const windSpeedMs = currentData.windspeed * 0.27778;
-
     const daily = data.days.map((day: any) => {
       const hourly = day.hours?.map((hour: any) => ({
         time: hour.datetime,
         temperature_2m: hour.temp,
         weathercode: getWeatherCodeFromIcon(hour.icon),
-        windspeed_10m: hour.windspeed * 0.27778,
+        windspeed_10m: hour.windspeed,
         relativehumidity_2m: hour.humidity,
         precipitation: hour.precip,
         rain: hour.precip,
-        modelTemps: { ecmwf: null, gfs: null, icon: null },
+        modelTemps: { ecmwf: null, gfs: null, icon: null, gem: null, jma: null },
       })) || [];
 
       return {
@@ -92,7 +97,7 @@ export async function fetchVisualCrossingData(coords: Coordinates): Promise<Visu
         time: currentData.datetime,
         temperature_2m: currentData.temp,
         weathercode: getWeatherCodeFromIcon(currentData.icon),
-        windspeed_10m: windSpeedMs,
+        windspeed_10m: currentData.windspeed,
         relativehumidity_2m: currentData.humidity,
         precipitation: currentData.precip,
         rain: currentData.precip,
